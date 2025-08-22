@@ -27,6 +27,7 @@ class ProductShowResource extends JsonResource
 
             $groups[$catId]['items'][] = [
                 'id'            => $item->product->id,
+                'combo_id'      => $item->id,
                 'name_uz'       => $item->product->name_uz,
                 'name_ru'       => $item->product->name_ru,
                 'name_en'       => $item->product->name_en,
@@ -46,6 +47,7 @@ class ProductShowResource extends JsonResource
             'modifier'      => $this->modifiers,
             'price'         => $this->price,
             'image_path'    => $this->image_path ? asset('storage/' . $this->image_path) : null,
+            'type'          => $this->type,
             'combo_items'   => array_values($groups),
         ];
     }

@@ -9,31 +9,27 @@ class GeoController extends Controller
 {
     public function getAddress(Request $request, GeocodeService $geocodeService)
     {
-        // Foydalanuvchi tilini aniqlash
-        $locale = app()->getLocale(); // uz, ru, en
-        // GET query parameterlarini validatsiya qilish
         $request->validate([
-            'lat' => 'required|numeric',
-            'lon' => 'required|numeric',
+            'lat'  => 'required|numeric',
+            'long' => 'required|numeric',
+            "lang" => 'required|in:uz_UZ,ru_RU,en_US'
         ]);
 
-        // Yandex API uchun til mapping
-        $lang = match ($locale) {
-            'uz' => 'uz_UZ',
-            'ru' => 'ru_RU',
-            default => 'en_US',
-        };
-
-        // Yandex geocode API orqali manzilni olish
-        $address = $geocodeService->getAddressFromCoords(
-            $request->query('lat'),
-            $request->query('lon'),
-            $lang
+        $response = $geocodeService->getAddressFromCoords(
+            $request->lat,
+            $request->long,
+            $request->lang
         );
 
-        // Javobni JSON formatida qaytarish
-        return response()->json([
-            'address' => $address
-        ]);
+        // Agar xato bo‘lsa
+        if (!$response->successful()) {
+            $body = $response->json();
+            return response()->json([
+                'error'  => $body['message'],
+            ], $response->status());
+        }
+
+        // To‘g‘ri javob bo‘lsa
+        return response()->json($response->json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']);
     }
 }

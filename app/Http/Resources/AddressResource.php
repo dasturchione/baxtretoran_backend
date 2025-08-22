@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AddressResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'name_uz'       => $this->name_uz,
+            'name_ru'       => $this->name_ru,
+            'name_en'       => $this->name_en,
+            'long'          => $this->long,
+            'lat'           => $this->lat,
+            'created_at'    => date_format_short($this->created_at)
+        ];
+    }
+}

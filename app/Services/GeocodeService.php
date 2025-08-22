@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class GeocodeService
 {
@@ -12,17 +13,13 @@ class GeocodeService
         $apiKey = config('services.yandex.api_key');
 
         $response = Http::get("https://geocode-maps.yandex.ru/1.x/", [
-            'apikey' => $apiKey,
+            'apikey'  => $apiKey,
             'geocode' => "$lon,$lat",
-            'format' => 'json',
-            'lang' => $lang,
+            'format'  => 'json',
+            'lang'    => $lang,
         ]);
 
-        if ($response->successful()) {
-            Log::error($response);
-            return $response->json() ?? null;
-        }
-Log::error($response);
-        return null;
+        // xatoni o‘zida exception tashlamaymiz, balki qaytaramiz
+        return $response;
     }
 }

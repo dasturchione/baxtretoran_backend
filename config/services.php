@@ -18,6 +18,10 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+    'yandex' => [
+        'api_key' => env('YANDEX_API_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],

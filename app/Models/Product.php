@@ -38,6 +38,17 @@ class Product extends Model
         return $this->belongsToMany(Modifier::class, 'product_modifier_items');
     }
 
+    public function recommendations()
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'product_recommendations',
+            'product_id',
+            'recommended_product_id'
+        );
+    }
+
+
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
