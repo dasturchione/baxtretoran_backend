@@ -7,17 +7,9 @@ use App\Models\PromoCode;
 use App\Models\PaymeUz;
 use App\Models\SiteSetting;
 use App\Http\Resources\PaymeTransationResource;
-use App\Http\Controllers\TelegramBotController;
-
 
 class PaymeService
 {
-    protected $telegramController;
-
-    public function __construct(TelegramBotController $telegramController)
-    {
-        $this->telegramController = $telegramController;
-    }
 
     public function CheckPerformTransaction($data)
     {
@@ -36,15 +28,10 @@ class PaymeService
                     ->selectRaw('SUM(price * quantity) as totalPrice, SUM(discount * quantity) as totalDiscount')
                     ->first();
 
-                    // Promo kod narxini olish
-                    $promoPrice = $order->promo_code
-                    ? PromoCode::where('id', $order->promo_code)->value('price')
-                    : 0;
-
                     // Yakuniy summa hisoblash
                     $totalPrice = $orderItems->totalPrice ?? 0;
                     $totalDiscount = $orderItems->totalDiscount ?? 0;
-                    $totalAmount = $totalPrice - $totalDiscount - $promoPrice;
+                    $totalAmount = $totalPrice - $totalDiscount;
 
 
                     $orderItems = OrderItem::where('order_id', $order->id)
@@ -57,7 +44,7 @@ class PaymeService
                         })->first();
 
                         // Items massivini yaratish
-                            $items = $orderItems->map(function ($orderItem) use ($promoPrice, $highestPriceOrderItem) {
+                            $items = $orderItems->map(function ($orderItem) use ($highestPriceOrderItem) {
                             $product = $orderItem->product;
 
                             // Agar eng qimmat buyurtma elementiga to‘g‘ri kelsa, promo-discountni qo‘shamiz
@@ -65,13 +52,8 @@ class PaymeService
                                 ? ($orderItem->discount * $orderItem->quantity) * 100
                                 : 0;
 
-                            if ($orderItem->is($highestPriceOrderItem)) {
-                                $discount += ($promoPrice * 100); // Promo-discountni qo‘shish
-                            }
-
                             return [
-                                "discount" => $discount,
-                                "title" => $product->name,
+                                "title" => $product->name_uz,
                                 "price" => $orderItem->price * 100,
                                 "count" => $orderItem->quantity,
                                 "code" => $product->ikpu_code,
@@ -168,15 +150,10 @@ class PaymeService
                 ->selectRaw('SUM(price * quantity) as totalPrice, SUM(discount * quantity) as totalDiscount')
                 ->first();
 
-                // Promo kod narxini olish
-                $promoPrice = $order->promo_code
-                ? PromoCode::where('id', $order->promo_code)->value('price')
-                : 0;
-
                 // Yakuniy summa hisoblash
                 $totalPrice = $orderItems->totalPrice ?? 0;
                 $totalDiscount = $orderItems->totalDiscount ?? 0;
-                $totalAmount = $totalPrice - $totalDiscount - $promoPrice;
+                $totalAmount = $totalPrice - $totalDiscount;
             }
 
 

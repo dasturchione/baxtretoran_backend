@@ -22,6 +22,11 @@ return [
         'api_key' => env('YANDEX_API_KEY'),
     ],
 
+    'playmobile' => [
+        'url' => env('PLAYMOBILE_URL'),
+        'key' => env('PLAYMOBILE_KEY'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],

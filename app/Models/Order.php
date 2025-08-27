@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
     protected $fillable = [
+        'user_id',
         'payment_method_id',
         'payment_status',
         'deliver_id',
@@ -14,6 +16,40 @@ class Order extends Model
         'user_address_id',
         'branch_id',
         'status',
-
     ];
+
+
+    protected $casts = [
+        'status' => OrderStatus::class,
+    ];
+
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(UserAddress::class, 'user_address_id');
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function getTotalPriceAttribute()
+    {
+        return $this->items->sum(fn($item) => $item->quantity * $item->product->price);
+    }
 }

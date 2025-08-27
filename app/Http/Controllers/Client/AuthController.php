@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Client;
 
-use Carbon\Carbon;
+use App\Jobs\SendSmsJob;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -29,7 +28,7 @@ class AuthController extends Controller
         $alreadyRegistered = User::where('phone', $request->phone)->exists();
 
         // TODO: SMS servis orqali yuborish (nexmo, playmobile, etc.)
-        // SmsService::send($request->phone, "Your code: {$code}");
+        SendSmsJob::dispatch("{$request->phone}", "Sizning tasdiqlash kodingiz: {$code}");
 
         return response()->json([
             'message' => 'Verification code sended',

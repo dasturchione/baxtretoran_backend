@@ -11,6 +11,10 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'combo_items',
-
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }
