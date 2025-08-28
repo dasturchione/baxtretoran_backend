@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [UserOrderController::class, 'index']);
     Route::get('/order/{id}', [UserOrderController::class, 'show']);
     Route::post('/orders/create', [UserOrderController::class, 'create']);
+    Route::post('/orders/cancel/{id}', [UserOrderController::class, 'cancel']);
 
     Route::post('/push-subscription', [PushController::class,'store']);
 });

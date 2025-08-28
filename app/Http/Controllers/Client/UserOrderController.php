@@ -122,4 +122,37 @@ class UserOrderController extends Controller
         });
         return response()->json(['message' => 'Order created successfully', 'data' => $order]);
     }
+
+    public function cancel($id)
+    {
+        $order = Auth::user()
+            ->orders()
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $canCancel = false;
+
+        if ($order->payment_method_id === 1 && $order->status === OrderStatus::ORDERED->value) {
+            $canCancel = true;
+        }
+
+        if ($order->payment_method_id !== 1 && $order->status === OrderStatus::PAYMENT_FAILED->value) {
+            $canCancel = true;
+        }
+
+        if (! $canCancel) {
+            return response()->json([
+                'message' => 'Bu buyurtmani bekor qilish mumkin emas.'
+            ], 400);
+        }
+
+        $order->update([
+            'status' => OrderStatus::CANCELLED->value
+        ]);
+
+        return response()->json([
+            'message' => 'Buyurtma muvaffaqiyatli bekor qilindi.',
+            'order'   => $order
+        ]);
+    }
 }
