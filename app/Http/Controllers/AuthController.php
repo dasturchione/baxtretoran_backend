@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Client;
+namespace App\Http\Controllers;
 
-use App\Jobs\SendSmsJob;
 use App\Models\User;
+use App\Jobs\SendSmsJob;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -128,5 +129,68 @@ class AuthController extends Controller
         cookie()->queue(cookie()->forget('refresh_token'));
 
         return response()->json(['message' => 'Tizimdan chiqildi']);
+    }
+
+    // Admin
+
+
+
+    public function employeeLogin(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        $employee = \App\Models\Employee::where('email', $credentials['email'])->first();
+
+        if (! $employee || ! Hash::check($credentials['password'], $employee->password)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        $token = $employee->createToken('employee-token', ['*'], now()->addDay())->plainTextToken;
+
+        return response()->json([
+            'status'   => true,
+            'guard'    => 'employee',
+            'employee' => $employee,
+            'token'    => $token,
+        ]);
+    }
+
+
+    public function checkToken(Request $request)
+    {
+        $user = Auth::user(); // <- user() qo'shildi
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token invalid'
+            ], 401);
+        }
+
+        $roles = $user->getRoleNames();         // Collection: ['admin', 'manager']
+        $permissions = $user->getAllPermissions()->pluck('name'); // Collection: ['edit orders', 'view dashboard']
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        $user = Auth::user();
+
+        return response()->json([
+            'employee' => $user,
+            'roles' => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name')
+        ]);
     }
 }

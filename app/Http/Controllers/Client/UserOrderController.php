@@ -44,7 +44,7 @@ class UserOrderController extends Controller
     {
         $order = Auth::user()
             ->orders()
-            ->with(['items.product', 'address'])
+            ->with(['items.product', 'address', 'paymentMethod'])
             ->findOrFail($id);
 
         return new OrderResource($order);

@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://baxtrestoran.uz', 'http://localhost:4000', 'https://wayone-clone.netlify.app'],
+    'allowed_origins' => ['https://baxtrestoran.uz', 'http://localhost:4000', 'http://localhost:5173', 'https://wayone-clone.netlify.app'],
 
     'allowed_origins_patterns' => [],
 

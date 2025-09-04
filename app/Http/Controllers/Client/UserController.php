@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -24,13 +25,7 @@ class UserController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'phone' => $user->phone,
-            'birthday' => date_format_short($user->birthday),
-            'push_notification' => $user->subscription ? (bool)$user->subscription->is_active : false,
-        ]);
+        return new UserResource($user);
     }
 
     public function updateUserInfo(Request $request)

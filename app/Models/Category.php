@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\ModelHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
+    use ModelHelperTrait;
+
     protected $fillable = [
         'name_uz',
         'name_ru',

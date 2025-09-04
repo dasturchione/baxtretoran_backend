@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\EmployeeController;
+use App\Http\Controllers\Admin\PermissionController;
+use App\Http\Controllers\Admin\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeoController;
-use App\Http\Controllers\Client\AuthController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Client\PushController;
 use App\Http\Controllers\Client\AddressController;
+use App\Http\Controllers\Client\BannerController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\UserController;
@@ -20,6 +27,7 @@ Route::prefix('auth')->group(function () {
 
 Route::post('/getgeo-code', [GeoController::class, 'getAddress']);
 
+Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/products-group-by-category', [ProductController::class, 'index']);
@@ -27,9 +35,15 @@ Route::get('/product/{slug}', [ProductController::class, 'show']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/recommend/{productId}', [ProductController::class, 'recommend']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('user-aupdate', [UserController::class, 'updateUserInfo']);
+Route::get('/vapid-key', function () {
+    $keys = env('VAPID_PUBLIC_KEY');
+    return response()->json(['public_key' => $keys]);
+});
+
+Route::middleware('auth:user')->group(function () {
+    Route::post('user-update', [UserController::class, 'updateUserInfo']);
     Route::get('userinfo', [UserController::class, 'getUserInfo']);
+
     Route::get('/user-addresses', [AddressController::class, 'index']);
     Route::post('/user-addresses', [AddressController::class, 'store']);
     Route::delete('/user-addresses/{id}', [AddressController::class, 'destroy']);
@@ -39,10 +53,50 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/orders/create', [UserOrderController::class, 'create']);
     Route::post('/orders/cancel/{id}', [UserOrderController::class, 'cancel']);
 
-    Route::post('/push-subscription', [PushController::class,'store']);
+    Route::post('/push-subscription', [PushController::class, 'store']);
 });
 
-Route::get('/vapid-key', function () {
-    $keys = env('VAPID_PUBLIC_KEY');
-    return response()->json(['public_key' => $keys]);
+/// admin
+
+Route::prefix('admin')->group(function () {
+    Route::post('/auth/login', [AuthController::class, 'employeeLogin']);
+});
+
+Route::prefix('admin')->middleware('auth:employee')->group(function () {
+    Route::post('/auth/check-token', [AuthController::class, 'checkToken']);
+    Route::get('/auth/permissions', [AuthController::class, 'me']);
+
+    Route::get('/categories', [AdminCategoryController::class, 'index'])->middleware('permission:categories_view');
+    Route::get('/categories/show/{id}', [AdminCategoryController::class, 'show'])->middleware('permission:categories_view');
+    Route::post('/categories', [AdminCategoryController::class, 'store'])->middleware('permission:categories_add');
+    Route::put('/categories/{id}', [AdminCategoryController::class, 'update'])->middleware('permission:categories_edit');
+    Route::delete('/categories/{id}', [AdminCategoryController::class, 'destroy'])->middleware('permission:categories_delete');
+
+    Route::get('/products', [AdminProductController::class, 'index'])->middleware('permission:product_view');
+    Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->middleware('permission:product_view');
+    Route::post('/products', [AdminProductController::class, 'store'])->middleware('permission:product_add');
+    Route::put('/products/{id}', [AdminProductController::class, 'update'])->middleware('permission:product_edit');
+    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->middleware('permission:product_delete');
+
+    Route::get('/roles', [RoleController::class, 'index']);
+    Route::get('/role/permissions/{role}', [RoleController::class, 'permissions']);
+    Route::put('/role/permissions/{role}', [RoleController::class, 'syncPermissions']);
+    Route::post('/roles', [RoleController::class, 'store']);
+    Route::put('/roles/{role}', [RoleController::class, 'update']);
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy']);
+
+    Route::get('/permissions', [PermissionController::class, 'index'])->middleware('permission:permissions_view');
+    Route::post('/permissions', [PermissionController::class, 'store']);
+    Route::put('/permissions/{permission}', [PermissionController::class, 'update']);
+    Route::delete('/permissions/{id}', [PermissionController::class, 'destroy']);
+
+    Route::get('/employees', [EmployeeController::class, 'index']);
+    Route::post('/employees', [EmployeeController::class, 'store'])->middleware('permission:employee_add');
+    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->middleware('permission:employee_edit');
+
+    Route::get('/users', [AdminUserController::class, 'index'])->middleware('permission:user_view');
+    Route::get('/users/show/{id}', [AdminUserController::class, 'show'])->middleware('permission:user_view');
+    Route::post('/users', [AdminUserController::class, 'store'])->middleware('permission:user_add');
+    Route::put('/users/{id}', [AdminUserController::class, 'update'])->middleware('permission:user_edit');
+
 });

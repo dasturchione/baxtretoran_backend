@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\ModelHelperTrait;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
+    use ModelHelperTrait;
+
     protected $fillable = [
         'name_uz',
         'name_ru',
@@ -19,9 +22,31 @@ class Product extends Model
         'image_path',
         'category_id',
         'slug',
-        'type'
+        'type',
+        'ikpu_code',
+        'package_code',
+        'vat_percent',
+        'is_active'
 
     ];
+
+    public static $helpers = [
+        'folderName' => 'Product',
+    ];
+
+    public function imageSize($field)
+    {
+        switch ($field) {
+            case 'image_path':
+                return [
+                    'thumb'    => [150, 150],
+                    'product'  => [300, null, 90],
+                    'original' => [null, null]
+                ];
+        }
+
+        return [];
+    }
 
     public function category()
     {
