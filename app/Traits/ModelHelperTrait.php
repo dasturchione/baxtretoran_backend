@@ -8,7 +8,7 @@ trait ModelHelperTrait
 
     public function folderPath($field = null)
     {
-        return '/storage/'.self::$helpers['folderName'].'/'.($this->attributes['iid'] ?? $this->attributes['id']).'/'.$field;
+        return '/storage/' . self::$helpers['folderName'] . '/' . ($this->attributes['iid'] ?? $this->attributes['id']) . '/' . $field;
     }
 
     public function getImg($field, $size)
@@ -19,16 +19,30 @@ trait ModelHelperTrait
             return '/images/Default/default.svg';
         }
 
-        return str_replace('.', '_'.$size.'.', $this->folderPath($field).'/'.$img);
+        return str_replace('.', '_' . $size . '.', $this->folderPath($field) . '/' . $img);
     }
 
     public function getImage($field, $src, $size = null)
     {
         if ($size) {
-            return str_replace('.', '_'.$size.'.', $this->folderPath($field).'/'.$src);
+            return str_replace('.', '_' . $size . '.', $this->folderPath($field) . '/' . $src);
         } else {
-            return $this->folderPath($field).'/'.$src;
+            return $this->folderPath($field) . '/' . $src;
         }
+    }
+
+    public function generateImages(string $column = 'image_path'): array
+    {
+        $images = [];
+        $sizes  = $this->imageSize($column);
+
+        foreach ($sizes as $key => $size) {
+            $images[$key] = asset(
+                $this->getImage($column, $this->$column, $key)
+            );
+        }
+
+        return $images;
     }
 
     // attributes
@@ -82,7 +96,7 @@ trait ModelHelperTrait
     {
         $newDate = new \DateTime('-2 days');
 
-        return $data->whereDate('created_at','>', $newDate);
+        return $data->whereDate('created_at', '>', $newDate);
     }
     public function scopeOrderBySort($data)
     {
@@ -111,14 +125,14 @@ trait ModelHelperTrait
             $q->where('quantity', '>', 0);
         }
 
-        if(request('category')) {
+        if (request('category')) {
             $category = request('category');
-            $q->whereHas('categories', function ($query) use ($category){
+            $q->whereHas('categories', function ($query) use ($category) {
                 $query->where('categories.id', $category)->orWhere('categories.parent_id', $category);
             });
         }
 
-        if(request('brand')) {
+        if (request('brand')) {
             $q->whereIn('brand_id', request('brand'));
         }
 

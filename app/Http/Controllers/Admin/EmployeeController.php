@@ -3,35 +3,44 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmployeeStoreRequest;
+use App\Http\Requests\EmployeeUpdateRequest;
+use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use App\Services\CrudService;
 
 class EmployeeController extends Controller
 {
 
-    public function index () {
-        $employee = Employee::all();
+    private $employeeModel;
+    private $crudService;
 
-        return $employee;
+    public function __construct(Employee $employeeModel, CrudService $crudService)
+    {
+        $this->employeeModel = $employeeModel;
+        $this->crudService = $crudService;
     }
 
-    public function store(Request $request)
+    public function index()
     {
-        $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:employees,email',
-            'password' => 'required|string|min:6',
-            'role'     => 'required|string|exists:roles,name',
-        ]);
+        $employee = $this->employeeModel::all();
 
-        $employee = Employee::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+        return EmployeeResource::collection($employee);
+    }
 
-        $employee->syncRoles([$validated['role']]); // bitta role beramiz
+    public function show($id)
+    {
+        $users = $this->employeeModel::findOrFail($id);
+        return new EmployeeResource($users);
+    }
+
+    public function store(EmployeeStoreRequest $request)
+    {
+        $files = [];
+        if ($request->hasFile('image_path')) {
+            $files['image_path'] = $request->file('image_path');
+        }
+        $employee = $this->crudService->CREATE_OR_UPDATE($this->employeeModel, $request->validated(), $files, null);
 
         return response()->json([
             'employee' => $employee,
@@ -39,34 +48,24 @@ class EmployeeController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Employee $employee)
+    public function update(EmployeeUpdateRequest $request, $id)
     {
-        $validated = $request->validate([
-            'name'     => 'sometimes|required|string|max:255',
-            'email'    => [
-                'sometimes',
-                'required',
-                'email',
-                Rule::unique('employees')->ignore($employee->id),
-            ],
-            'password' => 'nullable|string|min:6', // kelmasa o‘zgarmaydi
-            'role'     => 'sometimes|required|string|exists:roles,name',
-        ]);
-
-        $data = $request->only(['name', 'email']);
-        if (!empty($validated['password'])) {
-            $data['password'] = bcrypt($validated['password']);
+        $files = [];
+        if ($request->hasFile('image_path')) {
+            $files['image_path'] = $request->file('image_path');
         }
-
-        $employee->update($data);
-
-        if (!empty($validated['role'])) {
-            $employee->syncRoles([$validated['role']]);
-        }
+        $employee = $this->crudService->CREATE_OR_UPDATE($this->employeeModel, $request->validated(), $files, $id);
 
         return response()->json([
             'employee' => $employee,
             'roles'    => $employee->getRoleNames(),
         ]);
+    }
+
+    public function destroy(Employee $employee)
+    {
+        $employee->delete();
+
+        return response()->json(null, 204);
     }
 }

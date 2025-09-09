@@ -29,7 +29,7 @@ class OrderResource extends JsonResource
                     'name_uz'       => $item->product->name_uz,
                     'name_ru'       => $item->product->name_ru,
                     'name_en'       => $item->product->name_en,
-                    'image_path'    => $item->product->image_path ? asset('storage/' . $item->product->image_path) : null,
+                    'images'        => $item->product->generateImages(),
                     'quantity'      => $item->quantity,
                     'combo_items'   => $item->product->comboItems,
                     'price'         => $item->product->price,

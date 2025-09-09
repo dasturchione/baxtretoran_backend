@@ -40,7 +40,7 @@ class Product extends Model
             case 'image_path':
                 return [
                     'thumb'    => [150, 150],
-                    'product'  => [300, null, 90],
+                    'product'  => [600, null, 90],
                     'original' => [null, null]
                 ];
         }

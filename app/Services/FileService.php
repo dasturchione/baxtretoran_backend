@@ -26,9 +26,9 @@ class FileService
             $quality = 100;
             $extension = strtolower($file->getClientOriginalExtension());
             $unique = uniqid();
-            if (!in_array($extension, ["jpg", "jpeg", "png", "svg"])) {
+            if (!in_array($extension, ["jpg", "webp", "png", "svg"])) {
                 File::deleteDirectory($folderPath);
-                throw new \Exception('Fayllar quyidagi tipda bolishi kerak: jpg, jpeg, png, svg' );
+                throw new \Exception('Fayllar quyidagi tipda bolishi kerak: jpg, webp, png, svg' );
             }
 
             // если изображение не svg и нужно резать его, отправьте его на обрезку

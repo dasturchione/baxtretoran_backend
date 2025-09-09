@@ -18,7 +18,7 @@ class Banner extends Model
         switch ($field) {
             case 'image_path':
                 return [
-                    'large'  => [300, null, 90],
+                    'banner'  => [1920, null, 100],
                     'original' => [null, null]
                 ];
         }

@@ -8,34 +8,6 @@ class ProductShowResource extends JsonResource
 {
     public function toArray($request)
     {
-
-        // Guruhlash
-        $groups = [];
-        foreach ($this->comboItems as $item) {
-            $cat = $item->product->category;
-            $catId = $cat->id;
-
-            if (!isset($groups[$catId])) {
-                $groups[$catId] = [
-                    'category_id' => $cat->id,
-                    'name_uz'     => $cat->name_uz,
-                    'name_ru'     => $cat->name_ru,
-                    'name_en'     => $cat->name_en,
-                    'items'       => [],
-                ];
-            }
-
-            $groups[$catId]['items'][] = [
-                'id'            => $item->product->id,
-                'combo_id'      => $item->id,
-                'name_uz'       => $item->product->name_uz,
-                'name_ru'       => $item->product->name_ru,
-                'name_en'       => $item->product->name_en,
-                'image_path'    => $this->image_path ? asset('storage/' . $this->image_path) : null,
-                'extra_price'   => $item->extra_price,
-            ];
-        }
-
         return [
             'id'            => $this->id,
             'name_uz'       => $this->name_uz,
@@ -46,9 +18,43 @@ class ProductShowResource extends JsonResource
             'ingredient_en' => $this->ingredient_en,
             'modifier'      => $this->modifiers,
             'price'         => $this->price,
-            'image_path'    => $this->image_path ? asset('storage/' . $this->image_path) : null,
+            'image_path'    => $this->generateImages(),
             'type'          => $this->type,
-            'combo_items'   => array_values($groups),
+            'combo_items'   => $this->transformComboItems(),
         ];
+    }
+
+    protected function transformComboItems(): array
+    {
+        if (!$this->relationLoaded('comboItems')) return [];
+
+        return $this->comboItems
+            ->filter(fn($item) => $item->relationLoaded('product') && $item->product->relationLoaded('category'))
+            ->groupBy(fn($item) => $item->product->category->id)
+            ->map(function ($items, $categoryId) {
+                $category = $items->first()->product->category;
+
+                return [
+                    'category_id' => $category->id,
+                    'name_uz'     => $category->name_uz,
+                    'name_ru'     => $category->name_ru,
+                    'name_en'     => $category->name_en,
+                    'items'       => $items->map(function ($item) {
+                        $product = $item->product;
+
+                        return [
+                            'id'          => $product->id,
+                            'combo_id'    => $item->id,
+                            'name_uz'     => $product->name_uz,
+                            'name_ru'     => $product->name_ru,
+                            'name_en'     => $product->name_en,
+                            'image_path'  => $product->generateImages(),
+                            'extra_price' => $item->extra_price,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values()
+            ->toArray();
     }
 }

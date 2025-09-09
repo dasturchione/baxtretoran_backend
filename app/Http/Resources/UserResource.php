@@ -14,19 +14,13 @@ class UserResource extends JsonResource
      */
     public function toArray($request)
     {
-        $images = [];
-        $sizes = $this->imageSize('image_path'); // modeldagi imageSize() metodini chaqiramiz
-
-        foreach ($sizes as $key => $size) {
-            $images[$key] = asset($this->getImage('image_path', $this->image_path, $key));
-        }
 
         return [
             'id'       => $this->id,
             'name'     => $this->name,
             'birthday' => date_format_short($this->birthday),
             'phone'    => $this->phone,
-            'images'   => $images, // { 'large': '...', 'original': '...' }
+            'images'   => $this->generateImages(), // { 'large': '...', 'original': '...' }
         ];
     }
 }

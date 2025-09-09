@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductStoreRequest;
+use App\Http\Requests\ProductUpdateRequest;
+use App\Http\Resources\AdminProductShowResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
@@ -37,56 +40,87 @@ class AdminProductController extends Controller
         return ProductResource::collection($product);
     }
 
-    public function store(Request $request)
+    public function show($id)
     {
-        $validated = $request->validate([
-            'name_uz' => 'required|string|max:255',
-            'name_ru' => 'required|string|max:255',
-            'name_en' => 'required|string|max:255',
-            'ingredient_uz' => 'nullable|string',
-            'ingredient_ru' => 'nullable|string',
-            'ingredient_en' => 'nullable|string',
-            'price' => 'required|numeric',
-            'image_path' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'type' => 'required|in:simple,combo',
-            'ikpu_code' => 'required|string|max:50',
-            'package_code' => 'required|string|max:50',
-            'vat_percent' => 'required|numeric|min:0',
-            'is_active' => 'required|boolean',
-            'modifiers' => 'sometimes|array',
-            'modifiers.*' => 'integer|exists:modifiers,id',
-            'combo_items' => 'sometimes|array',
-            'combo_items.*' => 'integer|exists:products,id',
-        ]);
+        $product = $this->productModel->with([
+            'comboItems.product.category',
+            'modifiers'
+        ])->findOrFail($id);
 
+        return new AdminProductShowResource($product);
+    }
+
+    public function store(ProductStoreRequest $request)
+    {
+        $validated = $request->validated();
 
         // Agar type simple bo'lsa, combo_items kerak emas
         if ($validated['type'] === 'simple') {
             $validated['combo_items'] = [];
         }
 
+        // Faylni ajratish
         $files = [];
         if ($request->hasFile('image_path')) {
             $files['image_path'] = $request->file('image_path');
         }
 
+        // CREATE OR UPDATE
         $product = $this->crudService->CREATE_OR_UPDATE($this->productModel, $validated, $files, null);
 
-        // Modifiers va combo_items ni attach qilish
+        // ✅ modifiers: [{ modifier_id: 1 }, { modifier_id: 2 }]
         if (!empty($validated['modifiers'])) {
-            $product->modifiers()->sync($validated['modifiers']);
+            $modifierIds = collect($validated['modifiers'])->pluck('modifier_id')->toArray();
+            $product->modifiers()->sync($modifierIds);
         }
 
+        // ✅ combo_items: [{ product_id: 10 }, { product_id: 12 }]
         if ($validated['type'] === 'combo' && !empty($validated['combo_items'])) {
-            // Avval eski combo_itemsni o'chirish (agar update bo'lsa)
             $product->comboItems()->delete();
 
-            // Yangi combo_itemsni yaratish
-            foreach ($validated['combo_items'] as $item_id) {
+            foreach ($validated['combo_items'] as $item) {
                 $product->comboItems()->create([
-                    'product_id' => $item_id,
-                    'extra_price' => 0, // agar kerak bo'lsa
+                    'product_id' => $item['product_id'],
+                    'extra_price' => 0, // kerak bo‘lsa dynamic qiling
+                ]);
+            }
+        }
+
+        return response()->json($product, 201);
+    }
+
+    public function update(ProductUpdateRequest $request, $id)
+    {
+        $validated = $request->validated();
+
+        // Agar type simple bo'lsa, combo_items kerak emas
+        if ($validated['type'] === 'simple') {
+            $validated['combo_items'] = [];
+        }
+
+        // Faylni ajratish
+        $files = [];
+        if ($request->hasFile('image_path')) {
+            $files['image_path'] = $request->file('image_path');
+        }
+
+        // CREATE OR UPDATE
+        $product = $this->crudService->CREATE_OR_UPDATE($this->productModel, $validated, $files, $id);
+
+        // ✅ modifiers: [{ modifier_id: 1 }, { modifier_id: 2 }]
+        if (!empty($validated['modifiers'])) {
+            $modifierIds = collect($validated['modifiers'])->pluck('modifier_id')->toArray();
+            $product->modifiers()->sync($modifierIds);
+        }
+
+        // ✅ combo_items: [{ product_id: 10 }, { product_id: 12 }]
+        if ($validated['type'] === 'combo' && !empty($validated['combo_items'])) {
+            $product->comboItems()->delete();
+
+            foreach ($validated['combo_items'] as $item) {
+                $product->comboItems()->create([
+                    'product_id' => $item['product_id'],
+                    'extra_price' => 0, // kerak bo‘lsa dynamic qiling
                 ]);
             }
         }

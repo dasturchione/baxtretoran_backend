@@ -72,22 +72,35 @@ class CrudService
         try {
             $dataReq = $validated;
 
-            $data = $id ? $model::findOrFail($id) : new $model;
+            if (!empty($dataReq['password'])) {
+                $dataReq['password'] = bcrypt($dataReq['password']);
+            } else {
+                unset($dataReq['password']);
+            }
+
+
+
+            $instance  = $id ? $model::findOrFail($id) : new $model;
 
             // special processing
             $noChangedGallery = $dataReq['gallery'] ?? [];
             $dataReq['gallery'] = json_encode($noChangedGallery);
 
             if ($id) {
-                $data->update($dataReq);
+                $instance->update($dataReq);
             } else {
-                $data = $data->create($dataReq);
+                $instance  = $instance->create($dataReq);
+            }
+
+
+            if (!empty($validated['role']) && method_exists($instance, 'syncRoles')) {
+                $instance->syncRoles([$validated['role']]);
             }
 
             // applyImages
-            $uploadedImages = $this->applyImages($data, $files, $noChangedGallery);
+            $uploadedImages = $this->applyImages($instance, $files, $noChangedGallery);
             if (!empty($uploadedImages)) {
-                $data->update($uploadedImages);
+                $instance->update($uploadedImages);
             }
 
             DB::commit();
@@ -96,6 +109,6 @@ class CrudService
             throw new \DomainException($exception->getMessage());
         }
 
-        return $data;
+        return $instance;
     }
 }
