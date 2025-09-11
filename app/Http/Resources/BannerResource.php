@@ -19,7 +19,7 @@ class BannerResource extends JsonResource
             'title'         => $this->title,
             'image_path'    => $this->generateImages(),
             'link'          => $this->link,
-            'created_at'    => date_format_short($this->created_at)
+            'created_at'    => format_date($this->created_at)
         ];
     }
 }

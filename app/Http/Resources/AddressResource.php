@@ -20,7 +20,7 @@ class AddressResource extends JsonResource
             'name_en'       => $this->name_en,
             'long'          => $this->long,
             'lat'           => $this->lat,
-            'created_at'    => date_format_short($this->created_at)
+            'created_at'    => format_date($this->created_at)
         ];
     }
 }

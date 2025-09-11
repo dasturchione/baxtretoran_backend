@@ -16,12 +16,12 @@ class OrderResource extends JsonResource
     {
         return [
             'id'            => $this->id,
-            'user'          => $this->user,
+            'user'          => new UserResource($this->user),
             'delivery_type' => $this->delivery_type,
             'address'       => new AddressResource($this->address),
             'status'        => $this->status,
             'paymentMethod' => $this->paymentMethod,
-            'created_at'    => date_format_short($this->created_at),
+            'created_at'    => format_date($this->created_at, "d.m.Y H:i"),
             'total_price'   => $this->total_price,
             'items'         => $this->items->map(function ($item) {
                 return [

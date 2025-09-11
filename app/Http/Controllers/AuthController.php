@@ -4,15 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Jobs\SendSmsJob;
+use App\Services\PlayMobileService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\PersonalAccessToken;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+
+    protected $smsService;
+
+    public function __construct(PlayMobileService $smsService)
+    {
+        $this->smsService = $smsService;
+    }
     // 1. Telefon raqamga kod yuborish
     public function sendCode(Request $request)
     {
@@ -22,21 +31,34 @@ class AuthController extends Controller
 
         $code = rand(1000, 9999);
 
-        // kodni vaqtincha cache yoki redisga yozamiz
+        // kodni vaqtincha saqlash
         Cache::put("verify_{$request->phone}", $code, now()->addMinutes(5));
 
-        // Foydalanuvchi mavjudligini tekshirish
-        $alreadyRegistered = User::where('phone', $request->phone)->exists();
+        $user = User::where('phone', $request->phone)->first();
+        $alreadyRegistered = (bool) $user;
 
-        // TODO: SMS servis orqali yuborish (nexmo, playmobile, etc.)
-        SendSmsJob::dispatch("{$request->phone}", "Sizning tasdiqlash kodingiz: {$code}");
+        $data = (object)[
+            'phone' => phone_format($request->phone),
+            'text'  => (object)[
+                'custom' => (object)[
+                    'id'   => $user?->id,
+                    'name' => $user?->name ?? $request->phone
+                ],
+                'code' => $code
+            ]
+        ];
+
+        // auth_code template ishlatiladi
+        $this->smsService->handle("auth_code", $data, $user);
+
 
         return response()->json([
-            'message' => 'Verification code sended',
+            'message' => 'Verification code sent',
             'already_registered' => $alreadyRegistered,
             'code' => $code
         ]);
     }
+
 
 
     // 2. Telefon raqam + kodni tekshirish
@@ -80,7 +102,7 @@ class AuthController extends Controller
             'access_token' => $accessToken,
             'token_type'   => 'Bearer',
             'expires_in'   => now()->addDays(1)->diffForHumans(),
-            'is_new_user'  => !$user->wasRecentlyCreated ? false : true, // frontend ogohlantirish uchun
+            'is_new_user'  => !$user->wasRecentlyCreated ? false : true,
         ])->cookie(
             'refresh_token',
             $refreshToken,
@@ -173,8 +195,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $roles = $user->getRoleNames();         // Collection: ['admin', 'manager']
-        $permissions = $user->getAllPermissions()->pluck('name'); // Collection: ['edit orders', 'view dashboard']
+        $roles = $user->getRoleNames();
+        $permissions = $user->getAllPermissions()->pluck('name');
 
         return response()->json([
             'status' => 'success',

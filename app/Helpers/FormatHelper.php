@@ -6,16 +6,18 @@ use Carbon\Carbon;
 
 class FormatHelper
 {
-    // 998901234567 -> +998 (90) 123 45 67
-    public static function phone($phone)
+    public static function phone(string $phone): string
     {
-        $raw = preg_replace('/\D/', '', $phone);
+        // faqat raqamlarni qoldiramiz
+        $digits = preg_replace('/\D+/', '', $phone);
 
-        if (preg_match('/^998(\d{2})(\d{3})(\d{2})(\d{2})$/', $raw, $matches)) {
-            return "+998 ({$matches[1]}) {$matches[2]} {$matches[3]} {$matches[4]}";
+        // agar boshida 998 bo‘lmasa, avtomatik qo‘shamiz
+        if (strlen($digits) === 9) {
+            // masalan 933211377 -> 998933211377
+            $digits = '998' . $digits;
         }
 
-        return $phone;
+        return $digits;
     }
 
     // 10000 -> 10 000 so'm
@@ -28,11 +30,5 @@ class FormatHelper
     public static function date($date, $format = 'd.m.Y')
     {
         return Carbon::parse($date)->format($format);
-    }
-
-    //  * 2025-08-13 -> 13 Avgust 2025
-    public static function date_long($date)
-    {
-        return Carbon::parse($date)->translatedFormat('j F Y');
     }
 }

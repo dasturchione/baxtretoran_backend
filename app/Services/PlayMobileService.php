@@ -2,34 +2,74 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
+use App\Models\Message;
+use App\Models\SmsTemplate;
+use App\Helpers\TemplateRenderer;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+use App\Jobs\SendSmsJob;
 
 class PlayMobileService
 {
-    protected $apiUrl;
-    protected $apiKey;
-
-    public function __construct()
+    public function handle(string $eventKey, object $data, $messageable): void
     {
-        $this->apiUrl = config('services.playmobile.url');
-        $this->apiKey = config('services.playmobile.key');
-    }
 
-    /**
-     * SMS yuborish
-     *
-     * @param string $to
-     * @param string $message
-     * @return bool
-     */
-    public function send(string $to, string $message): bool
-    {
-        $response = Http::post($this->apiUrl, [
-            'to'      => $to,
-            'message' => $message,
-            'api_key' => $this->apiKey,
+        $template = SmsTemplate::where('key', $eventKey)->first();
+
+        if (!$template) {
+            Log::error("SMS template not found for key: {$eventKey}");
+            return;
+        }
+
+        $variables = array_merge(
+            ['date' => now()->format('Y-m-d')],
+            $this->objectToFlatArray($data->text)
+        );
+
+        $text = TemplateRenderer::render($template->content, $variables);
+
+        $body = [
+            "messages" => [
+                [
+                    "recipient"   => $data->phone,
+                    "message-id"  => Str::uuid()->toString(),
+                    "sms" => [
+                        "originator" => config('services.playmobile.originator'),
+                        "content"    => ["text" => $text]
+                    ]
+                ]
+            ]
+        ];
+
+        // save db
+        $message = Message::create([
+            'messageable_id'   => $messageable->id,
+            'messageable_type' => get_class($messageable),
+            'phone'            => $data->phone,
+            'date'             => now(),
+            'text'             => $text,
+            'status'           => 'pending'
         ]);
 
-        return $response->successful();
+        // dispatch job
+        SendSmsJob::dispatch($body, $message->id)->onQueue('sms');
+    }
+
+    function objectToFlatArray($object, $prefix = '')
+    {
+        $array = [];
+
+        foreach ((array) $object as $key => $value) {
+            $newKey = $prefix ? "{$prefix}_{$key}" : $key;
+
+            if (is_object($value) || is_array($value)) {
+                $array = array_merge($array, $this->objectToFlatArray($value, $newKey));
+            } else {
+                $array[$newKey] = $value;
+            }
+        }
+
+        return $array;
     }
 }

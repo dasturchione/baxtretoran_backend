@@ -23,8 +23,9 @@ return [
     ],
 
     'playmobile' => [
-        'url' => env('PLAYMOBILE_URL'),
-        'key' => env('PLAYMOBILE_KEY'),
+        'originator'    => env('PLAYMOBILE_ORIGINATOR'),
+        'auth'          => env('PLAYMOBILE_AUTH'),
+        'endpoint'      => env('PLAYMOBILE_ENDPOINT')
     ],
 
     'resend' => [

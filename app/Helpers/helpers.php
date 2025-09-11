@@ -17,17 +17,10 @@ if (!function_exists('price_format')) {
     }
 }
 
-if (!function_exists('date_format_short')) {
-    function date_format_short($date, $format = 'd.m.Y')
+if (!function_exists('format_date')) {
+    function format_date($date, $format = 'd.m.Y')
     {
         return FormatHelper::date($date, $format);
-    }
-}
-
-if (!function_exists('date_format_long')) {
-    function date_format_long($date)
-    {
-        return FormatHelper::date_long($date);
     }
 }
 

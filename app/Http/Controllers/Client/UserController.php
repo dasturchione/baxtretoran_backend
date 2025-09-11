@@ -50,7 +50,7 @@ class UserController extends Controller
             'id' => $user->id,
             'name' => $user->name,
             'phone' => $user->phone,
-            'birthday' => $user->birthday ? date_format_short($user->birthday) : null,
+            'birthday' => $user->birthday ? format_date($user->birthday) : null,
             'push_notification' => $user->subscription ? (bool)$user->subscription->is_active : false,
         ]);
     }
