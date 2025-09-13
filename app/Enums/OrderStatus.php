@@ -4,32 +4,26 @@ namespace App\Enums;
 
 enum OrderStatus: string
 {
-    case PAYMENT_PROCESS = 'payment_process';   // To‘lov jarayonida
-    case PAYMENT_FAILED = 'payment_failed';     // To‘lov amalga oshmadi
-    case PAID = 'paid';                         // To‘lov muvaffaqiyatli
+    case PAYMENT_PROCESS = 'payment_process';
+    case PAYMENT_FAILED = 'payment_failed';
+    case PAID = 'paid';
 
-    case ORDERED = 'ordered';                   // Buyurtma tushdi
-    case CONFIRMED = 'confirmed';               // Restoran tasdiqladi
-    case COOKING = 'cooking';                   // Taom tayyorlanmoqda
-    case READY = 'ready';                       // Tayyor bo‘ldi
+    case ORDERED = 'ordered';
+    case CONFIRMED = 'confirmed';
+    case COOKING = 'cooking';
+    case READY = 'ready';
 
-    // Delivery uchun
-    case DELIVERING = 'delivering';             // Kuryer olib ketdi
-    case DELIVERED = 'delivered';               // Yetkazildi
+    case DELIVERING = 'delivering';
+    case DELIVERED = 'delivered';
 
-    // Takeaway uchun
-    case WAITING_PICKUP = 'waiting_pickup';     // Tayyor, mijoz hali olmadi
-    case PICKED_UP = 'picked_up';               // Mijoz olib ketdi
+    case WAITING_PICKUP = 'waiting_pickup';
+    case PICKED_UP = 'picked_up';
 
-    // Umumiy
-    case CANCELLED = 'cancelled';               // Bekor qilingan
+    case CANCELLED = 'cancelled';
 
-    /**
-     * Statusga izoh qaytarish
-     */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PAYMENT_PROCESS => 'To‘lov jarayonida',
             self::PAYMENT_FAILED => 'To‘lov amalga oshmadi',
             self::PAID => 'To‘lov muvaffaqiyatli',
@@ -45,9 +39,24 @@ enum OrderStatus: string
         };
     }
 
-    /**
-     * Barcha statuslar va izohlar
-     */
+    public static function flow(): array
+    {
+        return [
+            self::PAYMENT_PROCESS->value => [self::PAYMENT_FAILED, self::PAID],
+            self::PAID->value            => [self::ORDERED],
+            self::ORDERED->value         => [self::CONFIRMED],
+            self::CONFIRMED->value       => [self::COOKING],
+            self::COOKING->value         => [self::READY],
+            self::READY->value           => [self::DELIVERING, self::WAITING_PICKUP],
+            self::DELIVERING->value      => [self::DELIVERED],
+            self::WAITING_PICKUP->value  => [self::PICKED_UP],
+            self::CANCELLED->value       => [],
+            self::DELIVERED->value       => [],
+            self::PICKED_UP->value       => [],
+        ];
+    }
+
+
     public static function options(): array
     {
         return array_map(fn($status) => [

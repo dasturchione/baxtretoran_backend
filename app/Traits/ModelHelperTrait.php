@@ -113,6 +113,10 @@ trait ModelHelperTrait
 
     public function scopeFilter($q)
     {
+        if (request('status')) {
+            $q->where('status', request('status'));
+        }
+
         if (request('name')) {
             $q->where('name', 'ILIKE', '%' . request('name') . '%');
         }
@@ -128,7 +132,8 @@ trait ModelHelperTrait
         if (request('category')) {
             $category = request('category');
             $q->whereHas('categories', function ($query) use ($category) {
-                $query->where('categories.id', $category)->orWhere('categories.parent_id', $category);
+                $query->where('categories.id', $category)
+                    ->orWhere('categories.parent_id', $category);
             });
         }
 
@@ -140,12 +145,16 @@ trait ModelHelperTrait
             $min = str_replace(' ', '', request('price_min'));
             $max = str_replace(' ', '', request('price_max'));
 
-            $q->whereBetween('price', array((int)$min, (int)$max));
+            $q->whereBetween('price', [(int)$min, (int)$max]);
         }
 
         if (request('sort_by')) {
             $sort = explode('/', request('sort_by'));
             $q->orderBy($sort[0], $sort[1]);
+        }
+
+        if (request('delivery_type')) {
+            $q->where('delivery_type', request('delivery_type'));
         }
     }
 }

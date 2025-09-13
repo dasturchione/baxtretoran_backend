@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminModifierController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\DeliverController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
@@ -97,6 +98,10 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     Route::delete('/products/delete/{id}', [AdminProductController::class, 'destroy'])->middleware('permission:product_delete');
 
     Route::get('/orders', [AdminOrderController::class, 'index']);
+    Route::get('/order/view/{id}', [AdminOrderController::class, 'show']);
+    Route::post('/order/status/{id}', [AdminOrderController::class, 'updateStatus']);
+    Route::get('/orders/cancel/{id}', [AdminOrderController::class, 'cancel']);
+    Route::post('/orders/assign', [AdminOrderController::class, 'assignCourier']);
 
     Route::get('/roles', [RoleController::class, 'index']);
     Route::get('/role/permissions/{role}', [RoleController::class, 'permissions']);
@@ -109,6 +114,13 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     Route::post('/permissions', [PermissionController::class, 'store']);
     Route::post('/permissions/{permission}', [PermissionController::class, 'update']);
     Route::delete('/permissions/delete/{id}', [PermissionController::class, 'destroy']);
+
+
+    Route::get('/delivers', [DeliverController::class, 'index'])->middleware('permission:employee_view');
+    Route::get('/delivers/show/{id}', [DeliverController::class, 'show'])->middleware('permission:employee_view');
+    Route::post('/delivers/create', [DeliverController::class, 'store'])->middleware('permission:employee_add');
+    Route::post('/delivers/edit/{id}', [DeliverController::class, 'update'])->middleware('permission:employee_edit');
+    Route::delete('/delivers/delete/{id}', [DeliverController::class, 'destroy'])->middleware('permission:employee_edit');
 
     Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employee_view');
     Route::get('/employees/show/{id}', [EmployeeController::class, 'show'])->middleware('permission:employee_view');

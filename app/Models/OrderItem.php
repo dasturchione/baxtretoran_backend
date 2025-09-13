@@ -13,8 +13,39 @@ class OrderItem extends Model
         'combo_items',
     ];
 
+    // JSON cast
+    protected $casts = [
+        'combo_items' => 'array',
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    // combo_items ni product bilan bog‘lab chiqarish
+    public function getComboItemsDetailedAttribute(): array
+    {
+        if (empty($this->combo_items)) {
+            return [];
+        }
+
+        return collect($this->combo_items)
+            ->map(function ($item) {
+                $product = Product::find($item['id']); // mahsulotni olib kelamiz
+                if (!$product) return null;
+
+                return [
+                    'id'         => $product->id,
+                    'name_uz'    => $product->name_uz,
+                    'name_ru'    => $product->name_ru,
+                    'name_en'    => $product->name_en,
+                    'image_path' => $product->generateImages(),
+                    'price'      => $product->price,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->toArray();
     }
 }

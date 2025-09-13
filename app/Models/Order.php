@@ -52,6 +52,16 @@ class Order extends Model
         return $this->belongsTo(Branch::class);
     }
 
+    public function deliver()
+    {
+        return $this->belongsTo(Deliver::class);
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(OrderStatusHistory::class);
+    }
+
     public function getTotalPriceAttribute()
     {
         return $this->items->sum(fn($item) => $item->quantity * $item->product->price);

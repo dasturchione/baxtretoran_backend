@@ -30,6 +30,10 @@ class ProductStoreRequest extends FormRequest
             'ingredient_ru' => 'required|string',
             'ingredient_en' => 'required|string',
 
+            'keywords_uz' => 'required|string',
+            'keywords_ru' => 'required|string',
+            'keywords_en' => 'required|string',
+
             'price' => 'required|numeric',
 
             // ✅ Fayl uchun ruxsat berilgan rasm formatlari (jpg, jpeg, png, webp va h.k.)

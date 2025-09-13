@@ -25,7 +25,7 @@ class AdminOrderController extends Controller
      */
     protected function findOrderOrFail(int $id): Order
     {
-        return $this->orderModel->with(['user', 'items.product', 'branch', 'address', 'courier'])
+        return $this->orderModel->with(['user', 'items.product', 'branch', 'address', 'deliver', 'histories'])
             ->findOrFail($id);
     }
 
@@ -40,16 +40,25 @@ class AdminOrderController extends Controller
         ]);
     }
 
+    protected function error($message, $data = [])
+    {
+        return response()->json([
+            'message' => $message,
+            'data'    => $data,
+        ], 422);
+    }
+
     public function index(Request $request)
     {
         $orders = $this->orderModel
             ->with(['user', 'items.product', 'branch', 'address'])
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->filter()
             ->latest()
             ->paginate(20);
 
         return OrderResource::collection($orders);
     }
+
 
     public function show($id)
     {
@@ -65,33 +74,63 @@ class AdminOrderController extends Controller
             'status' => ['required', Rule::in(array_column(OrderStatus::cases(), 'value'))],
         ]);
 
-        $newStatus = OrderStatus::from($request->status);
+        // Frontdan string keladi → enum obyektga aylantiramiz
+        $newStatus = OrderStatus::from((string) $request->status);
 
-        $order->update(['status' => $newStatus->value]);
+        // Order modelda status string bo‘lsa → enumga aylantiramiz
+        $currentStatus = $order->status instanceof OrderStatus
+            ? $order->status
+            : OrderStatus::from($order->status);
 
-        return $this->success("Status updated to {$newStatus->label()}", $order);
-    }
+        // Cancelled doimiy ruxsat
+        if ($newStatus === OrderStatus::CANCELLED) {
+            DB::transaction(function () use ($order, $newStatus) {
+                $order->update(['status' => $newStatus->value]);
+                $order->histories()->create(['status' => $newStatus->value]);
+            });
 
-    public function assignCourier(Request $request, $id)
-    {
-        $order = $this->findOrderOrFail($id);
-
-        if ($order->delivery_type !== 'delivery') {
-            return response()->json(['message' => 'Faqat delivery buyurtmaga kuryer biriktiriladi.'], 400);
+            return $this->success("Status updated to {$newStatus->label()}", $order->fresh('histories'));
         }
 
-        $request->validate([
-            'courier_id' => ['required', Rule::exists('users', 'id')->where('role', 'courier')],
-        ]);
+        $allowed = OrderStatus::flow()[$currentStatus->value] ?? [];
 
-        DB::transaction(function () use ($order, $request) {
-            $order->update([
-                'courier_id' => $request->courier_id,
-                'status'     => OrderStatus::DELIVERING->value,
-            ]);
+        if (!in_array($newStatus, $allowed, true)) {
+            return $this->error("Statusni \"{$currentStatus->label()}\" dan \"{$newStatus->label()}\" ga o‘tkazish mumkin emas!");
+        }
+
+        DB::transaction(function () use ($order, $newStatus) {
+            $order->update(['status' => $newStatus->value]);
+            $order->histories()->create(['status' => $newStatus->value]);
         });
 
-        return $this->success('Kuryer muvaffaqiyatli biriktirildi.', $order->load('courier'));
+        return $this->success("Status updated to {$newStatus->label()}", $order->fresh('histories'));
+    }
+
+
+    public function assignCourier(Request $request)
+    {
+        $validated = $request->validate([
+            'order_ids'   => ['required', 'array', 'min:1'],
+            'order_ids.*' => [
+                'integer',
+                Rule::exists('orders', 'id')->where(fn($q) => $q->where('delivery_type', 'delivery')),
+            ],
+            'delivery_id' => [
+                'required',
+                'integer',
+                Rule::exists('delivers', 'id')->where(fn($q) => $q->where('status', 'free')),
+            ],
+        ]);
+
+        DB::transaction(function () use ($validated) {
+            Order::whereIn('id', $validated['order_ids'])
+                ->update([
+                    'deliver_id' => $validated['delivery_id'],
+                    'status'     => OrderStatus::DELIVERING->value,
+                ]);
+        });
+
+        return response()->json(['message' => 'Orders successfully assigned!']);
     }
 
     public function cancel($id)

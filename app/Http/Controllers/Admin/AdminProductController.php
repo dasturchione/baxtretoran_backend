@@ -127,4 +127,24 @@ class AdminProductController extends Controller
 
         return response()->json($product, 201);
     }
+
+    public function destroy($id)
+    {
+        $product = Product::findOrFail($id);
+
+        try {
+            $product->delete(); // try to hard delete
+            return response()->json([
+                'success' => true,
+                'message' => 'Mahsulot muvaffaqiyatli o‘chirildi.'
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // agar delete imkoni bo‘lmasa, is_active = false qilamiz
+            $product->update(['is_active' => false]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Mahsulot bazada mavjud cheklov tufayli o‘chirilmadi, faqat faoliyati to‘xtatildi (is_active=false).'
+            ]);
+        }
+    }
 }
