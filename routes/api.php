@@ -58,6 +58,7 @@ Route::middleware('auth:user')->group(function () {
 
     Route::get('/user-addresses', [AddressController::class, 'index']);
     Route::post('/user-addresses/create', [AddressController::class, 'store']);
+    Route::post('/user-addresses/edit/{id}', [AddressController::class, 'update']);
     Route::delete('/user-addresses/delete/{id}', [AddressController::class, 'destroy']);
 
     Route::post('/product/comments/{id}', [ProductCommentController::class, 'store']);
