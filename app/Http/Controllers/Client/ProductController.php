@@ -40,19 +40,15 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        try {
-            $product = $this->productModel::where('slug', $slug)
-                ->with([
-                    'comboItems.product.category',
-                    'modifiers',
-                ])
-                ->withAvg('comments', 'rating') // shu yerda yuklab olamiz
-                ->firstOrFail();
+        $product = $this->productModel::where('slug', $slug)
+            ->with([
+                'comboItems.product.category',
+                'modifiers',
+            ])
+            ->withAvg('comments', 'rating') // shu yerda yuklab olamiz
+            ->firstOrFail();
 
-            return new ProductShowResource($product);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Product not found'], 404);
-        }
+        return new ProductShowResource($product);
     }
 
     public function search(Request $request)
