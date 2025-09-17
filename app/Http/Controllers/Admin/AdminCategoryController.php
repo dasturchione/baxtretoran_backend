@@ -24,7 +24,7 @@ class AdminCategoryController extends Controller
     {
         // Query param: ?paginate=10
         $perPage = $request->query('paginate');
-        $query = $this->categoryModel->withCount('products');
+        $query = $this->categoryModel->active()->withCount('products');
 
         if ($perPage) {
             $category = $query->paginate($perPage);

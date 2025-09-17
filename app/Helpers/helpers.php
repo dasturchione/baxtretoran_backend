@@ -1,7 +1,6 @@
 <?php
 
 use App\Helpers\FormatHelper;
-use Illuminate\Support\Facades\App;
 
 if (!function_exists('phone_format')) {
     function phone_format($phone)
@@ -21,22 +20,5 @@ if (!function_exists('format_date')) {
     function format_date($date, $format = 'd.m.Y')
     {
         return FormatHelper::date($date, $format);
-    }
-}
-
-if (! function_exists('locale_route')) {
-    function locale_route($name, $parameters = [], $absolute = true)
-    {
-        $locale = App::getLocale();
-
-        // Agar parametr massiv bo'lsa locale qo'shamiz
-        if (is_array($parameters)) {
-            $parameters = array_merge(['locale' => $locale], $parameters);
-        } else {
-            // Agar bitta parametr bo'lsa uni massivga o‘tkazamiz
-            $parameters = ['locale' => $locale, $parameters];
-        }
-
-        return route($name, $parameters, $absolute);
     }
 }

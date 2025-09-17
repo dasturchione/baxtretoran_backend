@@ -16,7 +16,7 @@ class CategoryController extends Controller {
     }
 
     public function index(){
-        $category = $this->categoryModel::where('is_active', true)->get();
+        $category = $this->categoryModel::active()->get();
         return  CategoryResource::collection($category);
     }
 }

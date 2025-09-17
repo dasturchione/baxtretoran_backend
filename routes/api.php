@@ -17,11 +17,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Client\PushController;
 use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\BannerController;
+use App\Http\Controllers\Client\BranchController;
 use App\Http\Controllers\Client\ProductController;
 use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\UserOrderController;
 use App\Http\Controllers\Payments\PaymeController;
+use App\Http\Controllers\SiteInfoController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/send-code', [AuthController::class, 'sendCode']);
@@ -33,12 +35,15 @@ Route::prefix('auth')->group(function () {
 Route::post('/getgeo-code', [GeoController::class, 'getAddress']);
 
 Route::get('/banners', [BannerController::class, 'index']);
+Route::get('/branches', [BranchController::class, 'index']);
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/products-group-by-category', [ProductController::class, 'index']);
 Route::get('/product/{slug}', [ProductController::class, 'show']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/recommend/{productId}', [ProductController::class, 'recommend']);
+
+Route::get('site-info', [SiteInfoController::class, 'show']);
 
 Route::get('/vapid-key', function () {
     $keys = env('VAPID_PUBLIC_KEY');
@@ -132,4 +137,7 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     Route::get('/users/show/{id}', [AdminUserController::class, 'show'])->middleware('permission:user_view');
     Route::post('/users/create', [AdminUserController::class, 'store'])->middleware('permission:user_add');
     Route::post('/users/edit/{id}', [AdminUserController::class, 'update'])->middleware('permission:user_edit');
+
+    Route::get('site-info', [SiteInfoController::class, 'show']);
+    Route::post('site-info/edit', [SiteInfoController::class, 'update']);
 });

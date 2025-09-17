@@ -45,20 +45,6 @@ trait ModelHelperTrait
         return $images;
     }
 
-    // attributes
-    public function getStatusUIAttribute()
-    {
-        switch ($this->attributes['status']) {
-            case 1:
-                return '<span class="btn-status btn-status-success">активно</span>';
-                break;
-            case 0:
-                return '<span class="btn-status btn-status-danger">не активно</span>';
-                break;
-            default:
-                return '';
-        }
-    }
     public function getIsNewAttribute()
     {
         $newDate = new \DateTime('-2 days');
