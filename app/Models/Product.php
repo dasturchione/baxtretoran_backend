@@ -6,10 +6,11 @@ use App\Traits\ModelHelperTrait;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Sluggable\HasSlug;
 
 class Product extends Model
 {
-    use ModelHelperTrait;
+    use ModelHelperTrait, HasSlug;
 
     protected $fillable = [
         'name_uz',
@@ -88,7 +89,8 @@ class Product extends Model
         return SlugOptions::create()
             ->generateSlugsFrom('name_ru')
             ->saveSlugsTo('slug')
-            ->usingLanguage('ru');
+            ->usingLanguage('ru')
+            ->doNotGenerateSlugsOnUpdate(false);
     }
 
     public static function boot()
