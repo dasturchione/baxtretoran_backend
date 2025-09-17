@@ -40,10 +40,6 @@ class AuthController extends Controller
         $data = (object)[
             'phone' => phone_format($request->phone),
             'text'  => (object)[
-                'custom' => (object)[
-                    'id'   => $user?->id,
-                    'name' => $user?->name ?? $request->phone
-                ],
                 'code' => $code
             ]
         ];

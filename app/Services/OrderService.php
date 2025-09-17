@@ -17,15 +17,18 @@ class OrderService
         return DB::transaction(function () use ($data) {
             $user = Auth::user();
 
+            $status = match ($data['payment_method_id']) {
+                1       => OrderStatus::ORDERED->value,
+                default => OrderStatus::PAYMENT_PROCESS->value,
+            };
+
             $order = Order::create([
                 'user_id'           => $user->id,
                 'payment_method_id' => $data['payment_method_id'],
                 'delivery_type'     => $data['delivery_type'],
                 'user_address_id'   => $data['address_id'] ?? null,
                 'branch_id'         => $data['branch_id'] ?? null,
-                'status'            => $data['payment_method_id'] == 1
-                    ? OrderStatus::ORDERED->value
-                    : OrderStatus::PAYMENT_PROCESS->value,
+                'status'            => $status,
             ]);
 
             foreach ($data['items'] as $itemData) {

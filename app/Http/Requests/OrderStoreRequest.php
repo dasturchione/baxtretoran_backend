@@ -16,7 +16,10 @@ class OrderStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payment_method_id' => ['required'],
+            'payment_method_id' => [
+                'required',
+                Rule::exists('payment_methods', 'id'),
+            ],
             'delivery_type'     => ['required', Rule::in(['delivery', 'takeaway'])],
 
             'address_id' => [

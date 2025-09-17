@@ -44,10 +44,9 @@ class PlayMobileService
 
         // save db
         $message = Message::create([
-            'messageable_id'   => $messageable->id,
-            'messageable_type' => get_class($messageable),
+            'messageable_id'   => $messageable?->id,
+            'messageable_type' => $messageable ? get_class($messageable) : null,
             'phone'            => $data->phone,
-            'date'             => now(),
             'text'             => $text,
             'status'           => 'pending'
         ]);
