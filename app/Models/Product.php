@@ -87,10 +87,13 @@ class Product extends Model
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('name_ru')
+            ->generateSlugsFrom(function () {
+                // original nomni olib, . ni olib tashlaymiz va keyin slug qilamiz
+                return preg_replace('/[^A-Za-z0-9\s]/u', '', $this->name_ru);
+            })
             ->saveSlugsTo('slug')
             ->usingLanguage('ru')
-            ->doNotGenerateSlugsOnUpdate(false);
+        ;
     }
 
     public static function boot()
