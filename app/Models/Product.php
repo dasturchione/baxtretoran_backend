@@ -61,6 +61,12 @@ class Product extends Model
         return $this->hasMany(ProductComboItem::class, 'combo_id');
     }
 
+    public function comments()
+    {
+        return $this->hasMany(ProductComment::class);
+    }
+
+
     public function modifiers()
     {
         return $this->belongsToMany(Modifier::class, 'product_modifier_items');

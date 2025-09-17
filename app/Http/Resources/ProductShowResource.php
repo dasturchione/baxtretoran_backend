@@ -19,6 +19,7 @@ class ProductShowResource extends JsonResource
             'keywords_uz' => $this->keywords_uz,
             'keywords_ru' => $this->keywords_ru,
             'keywords_en' => $this->keywords_en,
+            'average_rating' => round($this->comments()->avg('rating'), 1),
             'modifier'      => $this->modifiers,
             'price'         => $this->price,
             'image_path'    => $this->generateImages(),

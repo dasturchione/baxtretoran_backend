@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DeliverController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Client\ProductCommentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GeoController;
@@ -40,6 +41,7 @@ Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/products-group-by-category', [ProductController::class, 'index']);
 Route::get('/product/{slug}', [ProductController::class, 'show']);
+Route::get('/product/comments/{id}', [ProductCommentController::class, 'index']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/recommend/{productId}', [ProductController::class, 'recommend']);
 
@@ -57,6 +59,8 @@ Route::middleware('auth:user')->group(function () {
     Route::get('/user-addresses', [AddressController::class, 'index']);
     Route::post('/user-addresses', [AddressController::class, 'store']);
     Route::delete('/user-addresses/{id}', [AddressController::class, 'destroy']);
+
+    Route::post('/product/comments/{id}', [ProductCommentController::class, 'store']);
 
     Route::get('/orders', [UserOrderController::class, 'index']);
     Route::get('/order/{id}', [UserOrderController::class, 'show']);
@@ -98,7 +102,7 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
 
     Route::get('/products', [AdminProductController::class, 'index'])->middleware('permission:product_view');
     Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->middleware('permission:product_view');
-    Route::post('/products', [AdminProductController::class, 'store'])->middleware('permission:product_add');
+    Route::post('/products/create', [AdminProductController::class, 'store'])->middleware('permission:product_add');
     Route::post('/products/edit/{id}', [AdminProductController::class, 'update'])->middleware('permission:product_edit');
     Route::delete('/products/delete/{id}', [AdminProductController::class, 'destroy'])->middleware('permission:product_delete');
 
