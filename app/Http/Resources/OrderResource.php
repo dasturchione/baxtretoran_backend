@@ -35,8 +35,8 @@ class OrderResource extends JsonResource
                     'images'        => $item->product->generateImages(),
                     'quantity'      => $item->quantity,
                     'combo_items'   => $item->combo_items_detailed,
-                    'price'         => $item->product->price,
-                    'total'         => $item->quantity * $item->product->price,
+                    'price'         => $item->price,
+                    'total'         => $item->quantity * $item->price,
                 ];
             }),
         ];

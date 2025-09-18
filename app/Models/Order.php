@@ -64,6 +64,6 @@ class Order extends Model
 
     public function getTotalPriceAttribute()
     {
-        return $this->items->sum(fn($item) => $item->quantity * $item->product->price);
+        return $this->items->sum(fn($item) => $item->quantity * $item->price);
     }
 }

@@ -83,7 +83,6 @@ class BotHandler extends WebhookHandler
         }
         $data = json_decode($this->callbackQuery->data(), true);
 
-        // Callback parametrlardan order_id ni olish
         $orderId = $data['order_id'];
         Log::info("Order info" . $orderId);
         $order = $deliver->orders()->where('id', $orderId)->first();
@@ -103,11 +102,9 @@ class BotHandler extends WebhookHandler
         $text .= "👤 Mijoz: {$order->user->name}\n";
         $text .= "📍 Manzil: <a href=\"{$mapUrl}\">{$order->address->name_uz}</a>\n";
 
-
-        // Tugmalar (masalan, tasdiqlash / rad qilish / ortga qaytish)
         $keyboard = Keyboard::make()
             ->row([
-                Button::make("✅ Qabul qilish")->action('complated_order')->param('order_id', $order->id),
+                Button::make("✅ Qabul qilish")->action('delivered_order')->param('order_id', $order->id),
                 Button::make("❌ Bekor qilish")->action('cancel_order')->param('order_id', $order->id),
             ])
             ->row([

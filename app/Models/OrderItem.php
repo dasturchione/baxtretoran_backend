@@ -11,6 +11,7 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'combo_items',
+        'price',
     ];
 
     // JSON cast
