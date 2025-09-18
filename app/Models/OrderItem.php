@@ -19,6 +19,7 @@ class OrderItem extends Model
         'combo_items' => 'array',
     ];
 
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -27,13 +28,16 @@ class OrderItem extends Model
     // combo_items ni product bilan bog‘lab chiqarish
     public function getComboItemsDetailedAttribute(): array
     {
-        if (empty($this->combo_items)) {
+        if (empty($this->combo_items) || !is_array($this->combo_items)) {
             return [];
         }
 
         return collect($this->combo_items)
             ->map(function ($item) {
-                $product = Product::find($item['id']); // mahsulotni olib kelamiz
+                $productId = is_array($item) ? $item['id'] ?? null : $item; // integer bo‘lsa shunday olamiz
+                if (!$productId) return null;
+
+                $product = Product::find($productId);
                 if (!$product) return null;
 
                 return [
