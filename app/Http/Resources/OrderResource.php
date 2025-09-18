@@ -22,7 +22,8 @@ class OrderResource extends JsonResource
             'address'       => new AddressResource($this->address),
             'histories'     => $this->histories,
             'status'        => $this->status,
-            'paymentMethod' => $this->paymentMethod,
+            'paymentMethod' => new PaymentMethodResource($this->paymentMethod),
+            'paymentStatus' => $this->payment_status,
             'created_at'    => format_date($this->created_at, "d.m.Y H:i"),
             'total_price'   => $this->total_price,
             'items'         => $this->items->map(function ($item) {

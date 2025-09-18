@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\ModelHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymentMethod extends Model
 {
+    use ModelHelperTrait;
+
     protected $fillable = [
         'name',
         'image_path',
@@ -16,4 +19,20 @@ class PaymentMethod extends Model
     protected $hidden = [
         'secret_key',
     ];
+
+    public static $helpers = [
+        'folderName' => 'Payment',
+    ];
+
+    public function imageSize($field)
+    {
+        switch ($field) {
+            case 'image_path':
+                return [
+                    'payment'  => [600, null, 100],
+                ];
+        }
+
+        return [];
+    }
 }
