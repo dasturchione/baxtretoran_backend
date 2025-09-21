@@ -72,14 +72,21 @@ class ProductController extends Controller
 
     public function recommend($productId)
     {
+        // Agar "all" kelsa yoki id mavjud bo‘lmasa → random qaytaramiz
+        if ($productId === 'all' || !$this->productModel::find($productId)) {
+            $random = $this->productModel::inRandomOrder()->limit(5)->get();
+            return ProductResource::collection($random);
+        }
+
+        // Asosiy product + recommendation bilan olib kelamiz
         $product = $this->productModel::with('recommendations.category')->findOrFail($productId);
 
-        // 1️⃣ Admin belgilagan recommend mahsulotlar
+        // 1️⃣ Admin belgilagan recommendation’lar
         $recommended = $product->recommendations->where('id', '!=', $product->id);
 
-        // 2️⃣ Agar admin hech narsa belgilamagan bo‘lsa → fallback
+        // 2️⃣ Agar admin hech narsa belgilamagan bo‘lsa → random
         if ($recommended->isEmpty()) {
-            $recommended = $this->productModel::where('id', '!=', $product->id) // o‘zini chiqarib tashlaymiz
+            $recommended = $this->productModel::where('id', '!=', $product->id)
                 ->inRandomOrder()
                 ->limit(5)
                 ->get();

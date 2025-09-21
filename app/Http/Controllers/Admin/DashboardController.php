@@ -19,7 +19,7 @@ class DashboardController extends Controller
 
         // orders bilan order_items summasi
         $orders = Order::withSum('items', 'price')
-            ->whereDate('created_at', $today)
+            // ->whereDate('created_at', $today)
             ->get();
 
         $total_sales  = $orders->sum('items_sum_price');

@@ -12,6 +12,8 @@ class Branch extends Model
         'name',
         'long',
         'lat',
+        'work_time_start',
+        'work_time_end',
         'is_active'
     ];
 

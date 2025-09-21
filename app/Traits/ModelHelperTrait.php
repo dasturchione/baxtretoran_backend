@@ -103,10 +103,6 @@ trait ModelHelperTrait
             $q->where('status', request('status'));
         }
 
-        if (request('name')) {
-            $q->where('name', 'ILIKE', '%' . request('name') . '%');
-        }
-
         if (request('iid')) {
             $q->where('iid', request('iid'));
         }
@@ -142,5 +138,64 @@ trait ModelHelperTrait
         if (request('delivery_type')) {
             $q->where('delivery_type', request('delivery_type'));
         }
+
+        if (request('search')) {
+            $search = request('search');
+            $columns = $this->searchable;
+
+            $terms = explode(' ', $search);
+
+            $q->where(function ($q) use ($columns, $terms) {
+                foreach ($terms as $term) {
+                    $q->where(function ($q2) use ($columns, $term) {
+                        foreach ($columns as $col) {
+                            if (str_contains($col, '.')) {
+                                [$relation, $field] = explode('.', $col);
+                                $q2->orWhereHas($relation, function ($relQ) use ($field, $term) {
+                                    $relQ->where($field, 'ILIKE', "%$term%");
+                                });
+                            } else {
+                                if (is_numeric($term)) {
+                                    $q2->orWhere($col, $term);
+                                }
+                                $q2->orWhere($col, 'ILIKE', "%$term%");
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
+
+    // public function scopeSearch($query, $search)
+    // {
+    //     $columns = $this->searchable ?? [];
+
+    //     if (!$search || empty($columns)) {
+    //         return $query;
+    //     }
+
+    //     $terms = explode(' ', $search);
+
+    //     return $query->where(function ($q) use ($columns, $terms) {
+    //         foreach ($terms as $term) {
+    //             $q->where(function ($q2) use ($columns, $term) {
+    //                 foreach ($columns as $col) {
+    //                     if (str_contains($col, '.')) {
+    //                         // Relation qismi: category.name_uz
+    //                         [$relation, $field] = explode('.', $col);
+    //                         $q2->orWhereHas($relation, function ($relQ) use ($field, $term) {
+    //                             $relQ->where($field, 'ILIKE', "%$term%");
+    //                         });
+    //                     } else {
+    //                         if (is_numeric($term)) {
+    //                             $q2->orWhere($col, $term);
+    //                         }
+    //                         $q2->orWhere($col, 'ILIKE', "%$term%");
+    //                     }
+    //                 }
+    //             });
+    //         }
+    //     });
+    // }
 }

@@ -105,12 +105,12 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     });
 
     Route::prefix('branches')->group(function () {
-        Route::get('/', [AdminBranchController::class, 'index'])->middleware('permission:banner_view');
-        Route::get('/show/{id}', [AdminBranchController::class, 'show'])->middleware('permission:banner_view');
-        Route::post('/create', [AdminBranchController::class, 'store'])->middleware('permission:banner_add');
-        Route::post('/storearea', [AdminBranchController::class, 'storeArea'])->middleware('permission:banner_edit');
-        Route::post('/edit/{id}', [AdminBranchController::class, 'update'])->middleware('permission:banner_edit');
-        Route::delete('/delete/{id}', [AdminBranchController::class, 'destroy'])->middleware('permission:banner_delete');
+        Route::get('/', [AdminBranchController::class, 'index'])->middleware('permission:branch_view');
+        Route::get('/show/{id}', [AdminBranchController::class, 'show'])->middleware('permission:branch_view');
+        Route::post('/create', [AdminBranchController::class, 'store'])->middleware('permission:branch_add');
+        Route::post('/storearea', [AdminBranchController::class, 'storeArea'])->middleware('permission:branch_edit');
+        Route::post('/edit/{id}', [AdminBranchController::class, 'update'])->middleware('permission:branch_edit');
+        Route::delete('/delete/{id}', [AdminBranchController::class, 'destroy'])->middleware('permission:branch_delete');
     });
 
     Route::prefix('categories')->group(function () {

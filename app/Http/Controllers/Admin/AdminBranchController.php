@@ -26,7 +26,7 @@ class AdminBranchController extends Controller
     {
         // Query param: ?paginate=10
         $perPage = $request->query('paginate');
-        $query = $this->branchModel->active()->with('serviceAreas');
+        $query = $this->branchModel->with('serviceAreas');
 
         if ($perPage) {
             $branch = $query->paginate($perPage);
@@ -36,11 +36,52 @@ class AdminBranchController extends Controller
         return BranchResource::collection($branch);
     }
 
-    public function show($id){
+    public function show($id)
+    {
         $branch = $this->branchModel::with('serviceAreas')->findOrFail($id);
 
         return new BranchResource($branch);
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'lat'  => 'required|numeric',
+            'long' => 'required|numeric',
+            'is_active' => 'boolean',
+            'work_time_start' => 'required|date_format:H:i',
+            'work_time_end'   => 'required|date_format:H:i',
+        ]);
+
+        $branch = Branch::create($validated);
+
+        return response()->json([
+            'message' => 'Branch created successfully',
+            'data' => $branch
+        ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'lat'  => 'required|numeric',
+            'long' => 'required|numeric',
+            'is_active' => 'boolean',
+            'work_time_start' => 'required|date_format:H:i',
+            'work_time_end'   => 'required|date_format:H:i',
+        ]);
+
+        $branch = Branch::findOrFail($id);
+        $branch->update($validated);
+
+        return response()->json([
+            'message' => 'Branch updated successfully',
+            'data' => $branch
+        ]);
+    }
+
 
     public function storeArea(Request $request)
     {
@@ -60,5 +101,4 @@ class AdminBranchController extends Controller
             'data' => $area
         ]);
     }
-
 }

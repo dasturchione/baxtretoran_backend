@@ -34,9 +34,22 @@ class Product extends Model
 
     ];
 
+    protected $searchable = [
+        'name_uz',
+        'name_ru',
+        'name_en',
+        'price',
+        'ikpu_code',
+        'package_code',
+        'categories.name_uz',
+        'categories.name_ru',
+        'categories.name_en',
+    ];
+
     public static $helpers = [
         'folderName' => 'Product',
     ];
+
 
     public function imageSize($field)
     {
