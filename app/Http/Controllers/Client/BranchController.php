@@ -69,7 +69,7 @@ class BranchController extends Controller
         if ($serviceArea) {
             $polygon = $serviceArea->coordinates; // bu [ [lat, long], [lat, long], ... ] formatida bo‘lishi kerak
 
-            if (!$this->pointInPolygon([$long, $lat], $polygon)) {
+            if (!$this->pointInPolygon([$lat, $long], $polygon)) {
                 return response()->json([
                     'error' => "OUT_OF_SERVICE_AREA",
                     'message' => 'User is outside branch service area',
