@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SiteInfoController;
 
 use App\Http\Controllers\Admin\AdminBannerController;
+use App\Http\Controllers\Admin\AdminBranchController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminModifierController;
 use App\Http\Controllers\Admin\AdminOrderController;
@@ -28,7 +29,6 @@ use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\UserOrderController;
 use App\Http\Controllers\Payments\PaymeController;
 
-
 Route::prefix('auth')->group(function () {
     Route::post('/send-code', [AuthController::class, 'sendCode']);
     Route::post('/verify-code', [AuthController::class, 'verify']);
@@ -39,7 +39,10 @@ Route::prefix('auth')->group(function () {
 Route::post('/getgeo-code', [GeoController::class, 'getAddress']);
 
 Route::get('/banners', [BannerController::class, 'index']);
-Route::get('/branches', [BranchController::class, 'index']);
+Route::prefix('branches')->group(function () {
+    Route::get('/', [BranchController::class, 'index']);
+    Route::get('/nearest', [BranchController::class, 'nearestBranch']);
+});
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/products-group-by-category', [ProductController::class, 'index']);
@@ -90,6 +93,7 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::get('/top-products', [DashboardController::class, 'topProducts']);
         Route::get('/chart', [DashboardController::class, 'chart']);
     });
+
     Route::get('/transactions/payme', [PaymeController::class, 'transactions'])->middleware('permission:banner_view');
 
     Route::prefix('banners')->group(function () {
@@ -100,6 +104,15 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::delete('/delete/{id}', [AdminBannerController::class, 'destroy'])->middleware('permission:banner_delete');
     });
 
+    Route::prefix('branches')->group(function () {
+        Route::get('/', [AdminBranchController::class, 'index'])->middleware('permission:banner_view');
+        Route::get('/show/{id}', [AdminBranchController::class, 'show'])->middleware('permission:banner_view');
+        Route::post('/create', [AdminBranchController::class, 'store'])->middleware('permission:banner_add');
+        Route::post('/storearea', [AdminBranchController::class, 'storeArea'])->middleware('permission:banner_edit');
+        Route::post('/edit/{id}', [AdminBranchController::class, 'update'])->middleware('permission:banner_edit');
+        Route::delete('/delete/{id}', [AdminBranchController::class, 'destroy'])->middleware('permission:banner_delete');
+    });
+
     Route::prefix('categories')->group(function () {
         Route::get('/', [AdminCategoryController::class, 'index'])->middleware('permission:categories_view');
         Route::get('/show/{id}', [AdminCategoryController::class, 'show'])->middleware('permission:categories_view');
@@ -107,23 +120,30 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::post('/edit/{id}', [AdminCategoryController::class, 'update'])->middleware('permission:categories_edit');
         Route::delete('/delete/{id}', [AdminCategoryController::class, 'destroy'])->middleware('permission:categories_delete');
     });
-    Route::get('/modifiers', [AdminModifierController::class, 'index'])->middleware('permission:modifier_view');
-    Route::get('/modifiers/show/{id}', [AdminModifierController::class, 'show'])->middleware('permission:modifier_view');
-    Route::post('/modifiers/create', [AdminModifierController::class, 'store'])->middleware('permission:modifier_add');
-    Route::post('/modifiers/edit/{id}', [AdminModifierController::class, 'update'])->middleware('permission:modifier_edit');
-    Route::delete('/modifiers/delete/{id}', [AdminModifierController::class, 'destroy'])->middleware('permission:modifier_delete');
 
-    Route::get('/products', [AdminProductController::class, 'index'])->middleware('permission:product_view');
-    Route::get('/products/show/{id}', [AdminProductController::class, 'show'])->middleware('permission:product_view');
-    Route::post('/products/create', [AdminProductController::class, 'store'])->middleware('permission:product_add');
-    Route::post('/products/edit/{id}', [AdminProductController::class, 'update'])->middleware('permission:product_edit');
-    Route::delete('/products/delete/{id}', [AdminProductController::class, 'destroy'])->middleware('permission:product_delete');
+    Route::prefix('modifiers')->group(function () {
+        Route::get('/', [AdminModifierController::class, 'index'])->middleware('permission:modifier_view');
+        Route::get('/show/{id}', [AdminModifierController::class, 'show'])->middleware('permission:modifier_view');
+        Route::post('/create', [AdminModifierController::class, 'store'])->middleware('permission:modifier_add');
+        Route::post('/edit/{id}', [AdminModifierController::class, 'update'])->middleware('permission:modifier_edit');
+        Route::delete('/delete/{id}', [AdminModifierController::class, 'destroy'])->middleware('permission:modifier_delete');
+    });
 
-    Route::get('/orders', [AdminOrderController::class, 'index']);
-    Route::get('/order/view/{id}', [AdminOrderController::class, 'show']);
-    Route::post('/order/status/{id}', [AdminOrderController::class, 'updateStatus']);
-    Route::get('/orders/cancel/{id}', [AdminOrderController::class, 'cancel']);
-    Route::post('/orders/assign', [AdminOrderController::class, 'assignCourier']);
+    Route::prefix('products')->group(function () {
+        Route::get('/', [AdminProductController::class, 'index'])->middleware('permission:product_view');
+        Route::get('/show/{id}', [AdminProductController::class, 'show'])->middleware('permission:product_view');
+        Route::post('/create', [AdminProductController::class, 'store'])->middleware('permission:product_add');
+        Route::post('/edit/{id}', [AdminProductController::class, 'update'])->middleware('permission:product_edit');
+        Route::delete('/delete/{id}', [AdminProductController::class, 'destroy'])->middleware('permission:product_delete');
+    });
+
+    Route::prefix('orders')->group(function () {
+        Route::get('/', [AdminOrderController::class, 'index']);
+        Route::get('/view/{id}', [AdminOrderController::class, 'show']);
+        Route::post('/status/{id}', [AdminOrderController::class, 'updateStatus']);
+        Route::get('/cancel/{id}', [AdminOrderController::class, 'cancel']);
+        Route::post('/assign', [AdminOrderController::class, 'assignCourier']);
+    });
 
     Route::get('/roles', [RoleController::class, 'index']);
     Route::get('/role/permissions/{role}', [RoleController::class, 'permissions']);
@@ -137,12 +157,13 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     Route::post('/permissions/{permission}', [PermissionController::class, 'update']);
     Route::delete('/permissions/delete/{id}', [PermissionController::class, 'destroy']);
 
-
-    Route::get('/delivers', [DeliverController::class, 'index'])->middleware('permission:employee_view');
-    Route::get('/delivers/show/{id}', [DeliverController::class, 'show'])->middleware('permission:employee_view');
-    Route::post('/delivers/create', [DeliverController::class, 'store'])->middleware('permission:employee_add');
-    Route::post('/delivers/edit/{id}', [DeliverController::class, 'update'])->middleware('permission:employee_edit');
-    Route::delete('/delivers/delete/{id}', [DeliverController::class, 'destroy'])->middleware('permission:employee_edit');
+    Route::prefix('delivers')->group(function () {
+        Route::get('/', [DeliverController::class, 'index'])->middleware('permission:employee_view');
+        Route::get('/show/{id}', [DeliverController::class, 'show'])->middleware('permission:employee_view');
+        Route::post('/create', [DeliverController::class, 'store'])->middleware('permission:employee_add');
+        Route::post('/edit/{id}', [DeliverController::class, 'update'])->middleware('permission:employee_edit');
+        Route::delete('/delete/{id}', [DeliverController::class, 'destroy'])->middleware('permission:employee_edit');
+    });
 
     Route::get('/employees', [EmployeeController::class, 'index'])->middleware('permission:employee_view');
     Route::get('/employees/show/{id}', [EmployeeController::class, 'show'])->middleware('permission:employee_view');

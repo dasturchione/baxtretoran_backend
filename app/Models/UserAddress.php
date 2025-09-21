@@ -17,6 +17,8 @@ class UserAddress extends Model
     ];
 
     protected $casts = [
+        'lat'  => 'float',
+        'long' => 'float',
         'is_active' => 'bool'
     ];
 
@@ -25,7 +27,8 @@ class UserAddress extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function order(){
+    public function order()
+    {
         return $this->hasMany(Order::class);
     }
 }

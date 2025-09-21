@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +28,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            return response()->json([
+                'error'   => 'Unauthenticated.',
+                'message' => 'You need to login to perform this action.',
+            ], 401);
+        });
+
         $exceptions->render(function (RouteNotFoundException $e, $request) {
             return response()->json([
                 'error' => 'Unauthenticated.'

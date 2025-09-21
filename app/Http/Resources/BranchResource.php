@@ -19,6 +19,9 @@ class BranchResource extends JsonResource
             'name'              => $this->name,
             'long'              => $this->long,
             'lat'               => $this->lat,
+            'service_areas'   => $this->whenLoaded('serviceAreas', function () {
+                return $this->serviceAreas->pluck('coordinates');
+            }),
             'work_time_start'   => $this->work_time_start,
             'work_time_end'     => $this->work_time_end,
             'is_active'         => $this->is_active

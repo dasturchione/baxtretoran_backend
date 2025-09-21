@@ -31,6 +31,8 @@ class OrderService
                 'status'            => $status,
             ]);
 
+            $this->addHistory($order, OrderStatus::from($status));
+
             foreach ($data['items'] as $itemData) {
                 $product = Product::findOrFail($itemData['product_id']);
 
@@ -51,6 +53,28 @@ class OrderService
         });
     }
 
+    public function updateStatus(Order $order, OrderStatus $newStatus): array
+    {
+        // Joriy statusni aniqlaymiz
+        $currentStatus = $order->status instanceof OrderStatus
+            ? $order->status
+            : OrderStatus::from($order->status);
+
+        // Cancelled bo‘lsa → har doim ruxsat
+        if ($newStatus === OrderStatus::CANCELLED) {
+            return $this->applyStatus($order, $newStatus);
+        }
+
+        // Allowed statuslarni olib kelamiz
+        $allowed = OrderStatus::flow()[$currentStatus->value] ?? [];
+
+        if (!in_array($newStatus, $allowed, true)) {
+            throw new \Exception("Statusni \"{$currentStatus->label()}\" dan \"{$newStatus->label()}\" ga o‘tkazish mumkin emas!");
+        }
+
+        return $this->applyStatus($order, $newStatus);
+    }
+
     public function cancel(Order $order): bool
     {
         if ($this->canCancel($order)) {
@@ -65,5 +89,26 @@ class OrderService
     {
         return ($order->payment_method_id === 1 && $order->status === OrderStatus::ORDERED->value)
             || ($order->payment_method_id !== 1 && $order->status === OrderStatus::PAYMENT_FAILED->value);
+    }
+
+    /**
+     * Statusni DB ga yozish + history yaratish
+     */
+    public function applyStatus(Order $order, OrderStatus $newStatus): array
+    {
+        DB::transaction(function () use ($order, $newStatus) {
+            $order->update(['status' => $newStatus->value]);
+            $this->addHistory($order, $newStatus);
+        });
+
+        return [
+            'message' => "Status updated to {$newStatus->label()}",
+            'order'   => $order->fresh('histories'),
+        ];
+    }
+
+    protected function addHistory(Order $order, OrderStatus $status): void
+    {
+        $order->histories()->create(['status' => $status->value]);
     }
 }

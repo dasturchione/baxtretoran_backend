@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -13,11 +14,13 @@ use Illuminate\Validation\Rule;
 class AdminOrderController extends Controller
 {
 
-    protected Order $orderModel;
+    protected $orderModel;
+    protected $orderService;
 
-    public function __construct(Order $orderModel)
+    public function __construct(Order $orderModel, OrderService $orderService)
     {
         $this->orderModel = $orderModel;
+        $this->orderService = $orderService;
     }
 
     /**
@@ -74,36 +77,14 @@ class AdminOrderController extends Controller
             'status' => ['required', Rule::in(array_column(OrderStatus::cases(), 'value'))],
         ]);
 
-        // Frontdan string keladi → enum obyektga aylantiramiz
         $newStatus = OrderStatus::from((string) $request->status);
 
-        // Order modelda status string bo‘lsa → enumga aylantiramiz
-        $currentStatus = $order->status instanceof OrderStatus
-            ? $order->status
-            : OrderStatus::from($order->status);
-
-        // Cancelled doimiy ruxsat
-        if ($newStatus === OrderStatus::CANCELLED) {
-            DB::transaction(function () use ($order, $newStatus) {
-                $order->update(['status' => $newStatus->value]);
-                $order->histories()->create(['status' => $newStatus->value]);
-            });
-
-            return $this->success("Status updated to {$newStatus->label()}", $order->fresh('histories'));
+        try {
+            $result = $this->orderService->updateStatus($order, $newStatus);
+            return $this->success($result['message'], $result['order']);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage());
         }
-
-        $allowed = OrderStatus::flow()[$currentStatus->value] ?? [];
-
-        if (!in_array($newStatus, $allowed, true)) {
-            return $this->error("Statusni \"{$currentStatus->label()}\" dan \"{$newStatus->label()}\" ga o‘tkazish mumkin emas!");
-        }
-
-        DB::transaction(function () use ($order, $newStatus) {
-            $order->update(['status' => $newStatus->value]);
-            $order->histories()->create(['status' => $newStatus->value]);
-        });
-
-        return $this->success("Status updated to {$newStatus->label()}", $order->fresh('histories'));
     }
 
 

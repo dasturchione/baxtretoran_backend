@@ -16,6 +16,13 @@ class Branch extends Model
     ];
 
     protected $casts = [
+        'lat'  => 'float',
+        'long' => 'float',
         'is_active' => 'boolean'
     ];
+
+    public function serviceAreas()
+    {
+        return $this->hasMany(BranchServiceArea::class);
+    }
 }

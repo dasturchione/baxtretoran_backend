@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Models\BranchServiceArea;
+use App\Models\SiteInfo;
 use Illuminate\Http\Request;
 use App\Services\GeocodeService;
 
@@ -32,4 +35,5 @@ class GeoController extends Controller
         // To‘g‘ri javob bo‘lsa
         return response()->json($response->json()['response']['GeoObjectCollection']['featureMember'][0]['GeoObject']);
     }
+
 }
