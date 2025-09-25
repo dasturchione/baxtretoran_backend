@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RolePermissionResource;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 
@@ -10,7 +11,7 @@ class PermissionController extends Controller
 {
     public function index()
     {
-        return Permission::all();
+        return RolePermissionResource::collection(Permission::all());
     }
 
     public function store(Request $request)

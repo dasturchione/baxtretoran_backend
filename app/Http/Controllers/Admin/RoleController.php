@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RolePermissionResource;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
@@ -11,7 +12,8 @@ class RoleController extends Controller
 {
     public function index()
     {
-        return Role::with('permissions')->get();
+        $roles = Role::with('permissions')->get();
+        return RolePermissionResource::collection($roles);
     }
 
     public function store(Request $request)
@@ -20,7 +22,7 @@ class RoleController extends Controller
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'employee'
         ]);
-        return response()->json($role, 201);
+        return new RolePermissionResource($role);
     }
 
     public function update(Request $request, Role $role)
@@ -29,7 +31,7 @@ class RoleController extends Controller
             'name' => $request->name,
             'guard_name' => $request->guard_name ?? 'employee'
         ]);
-        return response()->json($role);
+        return new RolePermissionResource($role);
     }
 
     public function destroy(Role $role)
@@ -40,7 +42,7 @@ class RoleController extends Controller
 
     public function permissions(Role $role)
     {
-        return response()->json($role->permissions);
+        return RolePermissionResource::collection($role->permissions);
     }
 
     public function syncPermissions(Request $request, Role $role)
