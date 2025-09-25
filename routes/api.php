@@ -109,7 +109,7 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::get('/show/{id}', [AdminBannerController::class, 'show'])->middleware('permission:banner_view');
         Route::post('/create', [AdminBannerController::class, 'store'])->middleware('permission:banner_add');
         Route::post('/edit/{id}', [AdminBannerController::class, 'update'])->middleware('permission:banner_edit');
-        Route::delete('/delete/{id}', [AdminBannerController::class, 'destroy'])->middleware('permission:banner_delete');
+        Route::delete('/delete/{banner}', [AdminBannerController::class, 'destroy'])->middleware('permission:banner_delete');
     });
 
     Route::prefix('medias')->group(function () {

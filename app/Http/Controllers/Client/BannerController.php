@@ -16,7 +16,7 @@ class BannerController extends Controller
     }
 
     public function index() {
-        $banners = $this->bannerModel::get();
+        $banners = $this->bannerModel::active()->get();
         return BannerResource::collection($banners);
     }
 }
