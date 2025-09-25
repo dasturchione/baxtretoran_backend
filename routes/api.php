@@ -27,7 +27,9 @@ use App\Http\Controllers\Client\ProductCommentController;
 use App\Http\Controllers\Client\CategoryController;
 use App\Http\Controllers\Client\UserController;
 use App\Http\Controllers\Client\UserOrderController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Payments\PaymeController;
+use App\Http\Controllers\ServiceController;
 
 Route::prefix('auth')->group(function () {
     Route::post('/send-code', [AuthController::class, 'sendCode']);
@@ -104,6 +106,12 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::delete('/delete/{id}', [AdminBannerController::class, 'destroy'])->middleware('permission:banner_delete');
     });
 
+    Route::prefix('medias')->group(function () {
+        Route::get('/', [MediaController::class, 'index']);
+        Route::post('/upload', [MediaController::class, 'store']);
+        Route::delete('/delete/{media}', [MediaController::class, 'destroy']);
+    });
+
     Route::prefix('branches')->group(function () {
         Route::get('/', [AdminBranchController::class, 'index'])->middleware('permission:branch_view');
         Route::get('/show/{id}', [AdminBranchController::class, 'show'])->middleware('permission:branch_view');
@@ -176,6 +184,13 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
     Route::post('/users/create', [AdminUserController::class, 'store'])->middleware('permission:user_add');
     Route::post('/users/edit/{id}', [AdminUserController::class, 'update'])->middleware('permission:user_edit');
 
+    Route::prefix('services')->group(function () {
+        Route::get('/', [ServiceController::class, 'index'])->middleware('permission:service_view');
+        Route::get('/show/{id}', [ServiceController::class, 'show'])->middleware('permission:service_view');
+        Route::post('/create', [ServiceController::class, 'store'])->middleware('permission:service_add');
+        Route::post('/edit/{id}', [ServiceController::class, 'update'])->middleware('permission:service_edit');
+        Route::delete('/delete/{id}', [ServiceController::class, 'destroy'])->middleware('permission:service_delete');
+    });
     Route::get('site-info', [SiteInfoController::class, 'show']);
     Route::post('site-info/edit', [SiteInfoController::class, 'update']);
 });
