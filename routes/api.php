@@ -45,6 +45,12 @@ Route::prefix('branches')->group(function () {
     Route::get('/', [BranchController::class, 'index']);
     Route::get('/nearest', [BranchController::class, 'nearestBranch']);
 });
+
+Route::prefix('services')->group(function () {
+    Route::get('/', [ServiceController::class, 'index']);
+    Route::get('/show/{id}', [ServiceController::class, 'show']);
+});
+
 Route::get('/categories', [CategoryController::class, 'index']);
 
 Route::get('/products-group-by-category', [ProductController::class, 'index']);
