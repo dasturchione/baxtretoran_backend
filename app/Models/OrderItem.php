@@ -19,6 +19,10 @@ class OrderItem extends Model
         'combo_items' => 'array',
     ];
 
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 
     public function product()
     {

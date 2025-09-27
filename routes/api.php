@@ -97,6 +97,7 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
 
     Route::prefix('dashboard')->group(function () {
         Route::get('/widgets', [DashboardController::class, 'widgets']);
+        Route::get('/orderchart', [DashboardController::class, 'ordersWidget']);
         Route::get('/recent-orders', [DashboardController::class, 'recentOrders']);
         Route::get('/top-products', [DashboardController::class, 'topProducts']);
         Route::get('/chart', [DashboardController::class, 'chart']);
