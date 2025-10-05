@@ -27,14 +27,16 @@
     23 => 'DefStudio\\Telegraph\\TelegraphServiceProvider',
     24 => 'Intervention\\Image\\ImageServiceProvider',
     25 => 'Laravel\\Pail\\PailServiceProvider',
-    26 => 'Laravel\\Sail\\SailServiceProvider',
-    27 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    28 => 'Laravel\\Tinker\\TinkerServiceProvider',
-    29 => 'Carbon\\Laravel\\ServiceProvider',
-    30 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    31 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    32 => 'Spatie\\Permission\\PermissionServiceProvider',
-    33 => 'App\\Providers\\AppServiceProvider',
+    26 => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
+    27 => 'Laravel\\Reverb\\ReverbServiceProvider',
+    28 => 'Laravel\\Sail\\SailServiceProvider',
+    29 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    30 => 'Laravel\\Tinker\\TinkerServiceProvider',
+    31 => 'Carbon\\Laravel\\ServiceProvider',
+    32 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    33 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    34 => 'Spatie\\Permission\\PermissionServiceProvider',
+    35 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -51,12 +53,13 @@
     10 => 'DefStudio\\Telegraph\\TelegraphServiceProvider',
     11 => 'Intervention\\Image\\ImageServiceProvider',
     12 => 'Laravel\\Pail\\PailServiceProvider',
-    13 => 'Laravel\\Sanctum\\SanctumServiceProvider',
-    14 => 'Carbon\\Laravel\\ServiceProvider',
-    15 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
-    16 => 'Termwind\\Laravel\\TermwindServiceProvider',
-    17 => 'Spatie\\Permission\\PermissionServiceProvider',
-    18 => 'App\\Providers\\AppServiceProvider',
+    13 => 'Laravel\\Reverb\\ReverbServiceProvider',
+    14 => 'Laravel\\Sanctum\\SanctumServiceProvider',
+    15 => 'Carbon\\Laravel\\ServiceProvider',
+    16 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
+    17 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    18 => 'Spatie\\Permission\\PermissionServiceProvider',
+    19 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (
@@ -211,6 +214,8 @@
     'validator' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'validation.presence' => 'Illuminate\\Validation\\ValidationServiceProvider',
     'Illuminate\\Contracts\\Validation\\UncompromisedVerifier' => 'Illuminate\\Validation\\ValidationServiceProvider',
+    'Laravel\\Reverb\\ApplicationManager' => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
+    'Laravel\\Reverb\\Contracts\\ApplicationProvider' => 'Laravel\\Reverb\\ApplicationManagerServiceProvider',
     'Laravel\\Sail\\Console\\InstallCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
@@ -254,6 +259,9 @@
     array (
     ),
     'Illuminate\\Validation\\ValidationServiceProvider' => 
+    array (
+    ),
+    'Laravel\\Reverb\\ApplicationManagerServiceProvider' => 
     array (
     ),
     'Laravel\\Sail\\SailServiceProvider' => 

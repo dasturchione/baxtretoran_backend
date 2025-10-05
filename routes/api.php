@@ -31,6 +31,11 @@ use App\Http\Controllers\MediaController;
 use App\Http\Controllers\Payments\PaymeController;
 use App\Http\Controllers\ServiceController;
 
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
+
 Route::prefix('auth')->group(function () {
     Route::post('/send-code', [AuthController::class, 'sendCode']);
     Route::post('/verify-code', [AuthController::class, 'verify']);
