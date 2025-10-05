@@ -68,7 +68,7 @@ class AddressController extends Controller
             $polygon = $serviceArea->coordinates; // [ [lat, long], [lat, long], ...]
 
             // ⚠️ E'tibor: pointInPolygon funksiyasiga (long, lat) ko‘rinishida yuboramiz
-            if (!$this->pointInPolygon([$long, $lat], $polygon)) {
+            if (!$this->pointInPolygon([$lat, $long], $polygon)) {
                 return response()->json([
                     'error' => "OUT_OF_SERVICE_AREA",
                     'message' => 'Address is outside branch service area',
