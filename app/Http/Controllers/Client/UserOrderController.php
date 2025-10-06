@@ -10,6 +10,7 @@ use App\Http\Requests\OrderStoreRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\OrderResource;
 use App\Services\OrderService;
+use App\Events\AdminNotificationEvent;
 
 class UserOrderController extends Controller
 {
@@ -52,7 +53,12 @@ class UserOrderController extends Controller
     public function store(OrderStoreRequest $request)
     {
         $order = $this->orderService->create($request->validated());
-
+        $data = [
+            'id'    => $order->id,
+            'customer'  => $order->user->name,
+            'total'     => 20000
+        ];
+        event(new AdminNotificationEvent('neworder', $data));
         return response()->json([
             'message' => 'Buyurtma muvaffaqiyatli yaratildi.',
             'data'    => $order,

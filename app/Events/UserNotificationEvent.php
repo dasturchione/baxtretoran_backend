@@ -31,7 +31,7 @@ class UserNotificationEvent implements ShouldBroadcast
     // Frontend tomonda event nomi
     public function broadcastAs()
     {
-        return 'user.notification';
+        return 'UserNotification';
     }
 
     public function broadcastWith()
