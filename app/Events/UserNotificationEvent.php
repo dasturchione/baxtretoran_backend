@@ -15,20 +15,20 @@ class UserNotificationEvent implements ShouldBroadcast
 
     public $type;
     public $data;
+    public $userId; // qo‘shdik
 
-    public function __construct(string $type, array $data)
+    public function __construct(int $userId, string $type, array $data)
     {
+        $this->userId = $userId;
         $this->type = $type;
         $this->data = $data;
     }
 
-    // Kanal
     public function broadcastOn()
     {
         return new PrivateChannel('user.notifications.' . $this->userId);
     }
 
-    // Frontend tomonda event nomi
     public function broadcastAs()
     {
         return 'UserNotification';
@@ -42,3 +42,4 @@ class UserNotificationEvent implements ShouldBroadcast
         ];
     }
 }
+
