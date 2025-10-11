@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use App\Traits\ModelHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Deliver extends Model
 {
-    use HasFactory, ModelHelperTrait;
+    use HasActions, HasFactory, ModelHelperTrait;
 
     protected $fillable = [
         'name',

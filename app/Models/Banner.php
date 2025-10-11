@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use App\Traits\ModelHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Banner extends Model
 {
-    use ModelHelperTrait;
+    use HasActions, ModelHelperTrait;
 
     protected $fillable = [
         'title',

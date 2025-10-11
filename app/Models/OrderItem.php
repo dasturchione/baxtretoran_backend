@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
+    use HasActions;
+    
     protected $fillable = [
         'order_id',
         'product_id',

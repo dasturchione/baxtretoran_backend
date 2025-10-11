@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use App\Traits\ModelHelperTrait;
 use Spatie\Sluggable\SlugOptions;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Spatie\Sluggable\HasSlug;
 
 class Product extends Model
 {
-    use ModelHelperTrait, HasSlug;
+    use HasActions, ModelHelperTrait, HasSlug;
 
     protected $fillable = [
         'name_uz',

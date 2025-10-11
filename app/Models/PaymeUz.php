@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PaymeUz extends Model
 {
-    use HasFactory;
+    use HasActions, HasFactory;
+    
     protected $fillable = [
         'paycom_transaction_id',
         'paycom_time',

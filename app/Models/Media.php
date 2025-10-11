@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use Illuminate\Database\Eloquent\Model;
 
 class Media extends Model
 {
+    use HasActions;
+    
     protected $fillable = [
         'file_name',
         'original_name',

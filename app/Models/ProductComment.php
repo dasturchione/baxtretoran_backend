@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductComment extends Model
 {
+    use HasActions;
+    
     protected $fillable = [
         'product_id',
         'user_id',

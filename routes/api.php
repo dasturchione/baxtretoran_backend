@@ -17,7 +17,7 @@ use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\DashboardController;
-
+use App\Http\Controllers\Admin\SmsTemplateController;
 use App\Http\Controllers\Client\PushController;
 use App\Http\Controllers\Client\AddressController;
 use App\Http\Controllers\Client\BannerController;
@@ -203,6 +203,12 @@ Route::prefix('admin')->middleware('auth:employee')->group(function () {
         Route::post('/edit/{id}', [ServiceController::class, 'update'])->middleware('permission:service_edit');
         Route::delete('/delete/{id}', [ServiceController::class, 'destroy'])->middleware('permission:service_delete');
     });
+
+    Route::prefix('smstemplate')->group(function (){
+        Route::get('/', [SmsTemplateController::class, 'index']);
+        Route::get('/show/{id}', [SmsTemplateController::class, 'show']);
+    });
+
     Route::get('site-info', [SiteInfoController::class, 'show']);
     Route::post('site-info/edit', [SiteInfoController::class, 'update']);
 });

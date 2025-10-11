@@ -100,7 +100,7 @@ class CrudService
             // applyImages
             $uploadedImages = $this->applyImages($instance, $files, $noChangedGallery);
             if (!empty($uploadedImages)) {
-                $instance->update($uploadedImages);
+                $instance->updateQuietly($uploadedImages);
             }
 
             DB::commit();

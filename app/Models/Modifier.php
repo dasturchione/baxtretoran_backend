@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasActions;
 use App\Traits\ModelHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 
 class Modifier extends Model
 {
-    use ModelHelperTrait;
+    use HasActions, ModelHelperTrait;
+    
     protected $fillable = ['name_uz', 'name_ru', 'name_en', 'image_path', 'is_active'];
 
     public static $helpers = [
